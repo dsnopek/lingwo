@@ -1,0 +1,7 @@
+; $Id$
+name = Lingwo senses
+description = Adds support for multiple senses to the dictionary entry.
+package = Lingwo dictionary
+core = 6.x
+dependencies[] = lingwo_entry
+

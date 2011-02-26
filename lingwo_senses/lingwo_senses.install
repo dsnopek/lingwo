@@ -1,0 +1,72 @@
+<?php
+// $Id: $
+
+/**
+ * @file
+ * Install file for lingwo_senses.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function lingwo_senses_schema() {
+  $schema['lingwo_senses_revisions'] = array(
+    'description' => 'Stores the sense data for a revision of a given entry',
+    'fields' => array(
+      'vid' => array(
+        'description' => 'The primary identifier for this version.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'nid' => array(
+        'description' => 'The {node} this version belongs to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'data' => array(
+        'description' => 'Serialized data representing the senses.',
+        'type' => 'text',
+        'size' => 'normal',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array('nid'),
+    ),
+    'primary key' => array('vid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function lingwo_senses_install() {
+  drupal_install_schema('lingwo_senses');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function lingwo_senses_uninstall() {
+  drupal_uninstall_schema('lingwo_senses');
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function lingwo_senses_enable() {
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function lingwo_senses_disable() {
+}
+

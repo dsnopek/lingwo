@@ -1,0 +1,131 @@
+<?php
+// $Id: $
+
+/**
+ * @file
+ * Install file for lingwo_entry.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function lingwo_entry_schema() {
+  $schema['lingwo_entry'] = array(
+    'description' => 'Used to look-up dictionary entries and ensure uniqueness.',
+    'fields' => array(
+      'language' => array(
+        'description' => 'The {languages}.language of this node.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'pos' => array(
+        'description' => 'Part of speech',
+        'type' => 'varchar',
+        'length' => 24,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'headword' => array(
+        'description' => 'The headword of this entry.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'nid' => array(
+        'description' => 'The primary identifier for the entry node.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'entry_hash' => array(
+        'description' => 'A SHA-1 hash of language, pos and headword',
+        'type' => 'char',
+        'length'   => '40',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('language', 'pos', 'headword'),
+    'unique keys' => array(
+      'node' => array('nid'),
+    ),
+    'index' => array(
+      // probably should be unique, but I don't want to risk it right now
+      'entry_hash_index' => array('entry_hash'),
+    ),
+    // The default collation (utf8_general_ci) treats accented characters (like: ó, ą, ę, ń)
+    // as equivalent to their unaccented counter-parts.  Also, we want entry titles to be
+    // case-sensitively unique (ie. "Ps" is different than "PS") -- ticket #38.
+    'mysql_suffix' => "DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+  );
+
+  $schema['lingwo_entry_translation'] = array(
+    'description' => 'A redundant store of (nid, tnid) from the node table.  Used to work around a problem with the "translation" module.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The primary identifier for the entry node.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'tnid' => array(
+        'description' => 'The primary identifier for the translation set.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+    ),
+    'primary key' => array('nid', 'tnid'),
+  );
+
+  return $schema;
+}
+
+function _lingwo_entry_install_entry_type_create($type_name) {
+  if (!node_get_types('type', $type_name)) {
+    $entry_type = array(
+      'type' => $type_name,
+      'name' => 'Dictionary entry',
+      'module' => 'node',
+      'description' => 'A dictionary entry.',
+      'has_title' => TRUE,
+      'title_label' => 'Headword',
+      'has_body' => FALSE,
+      'custom' => TRUE,
+      'modified' => TRUE,
+      'locked' => FALSE,
+    );
+    $entry_type = (object)_node_type_set_defaults($entry_type);
+    node_type_save($entry_type);
+    variable_set('lingwo_entry_content_type', $type_name);
+    // By default, we enable translation, with the thinking that if the user has a multi-lingual site
+    // they probably want translation, if then setting this variable will affect nothing.
+    // 2 = TRANSLATION_ENABLED.  We can't use the symbol because 'translation' might not be enabled.
+    variable_set('language_content_type_entry', 2); 
+  }
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function lingwo_entry_install() {
+  drupal_install_schema('lingwo_entry');
+
+  // install the default entry content type
+  _lingwo_entry_install_entry_type_create('entry');
+
+  // we need to happen after the "locale" module (which we would if the module name was
+  // alphabetically higher) and probably after some other modules too..
+  update_sql("UPDATE {system} SET weight = 50 WHERE name = 'lingwo_entry'");
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function lingwo_entry_uninstall() {
+  drupal_uninstall_schema('lingwo_entry');
+}
+

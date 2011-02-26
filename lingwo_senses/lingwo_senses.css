@@ -1,0 +1,38 @@
+
+.lingwo-senses {
+}
+
+.lingwo-sense {
+}
+
+.lingwo-sense-difference {
+}
+
+.lingwo-sense-relationship {
+}
+
+.lingwo-sense-clue {
+  font-size: .8em;
+  font-style: italic;
+}
+
+.lingwo-sense-example {
+  font-style: italic;
+  margin-left: 2em;
+}
+
+.lingwo-sense-no-equivalent {
+}
+
+.lingwo-sense-no-difference {
+}
+
+/* Fix annoying core style issues with tables */
+.lingwo-sense-example tbody {
+  border-top: 0;
+}
+.lingwo-sense-example td, .lingwo-sense-example th {
+  padding: 0;
+  margin: 0;
+}
+

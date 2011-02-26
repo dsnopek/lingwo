@@ -1,0 +1,248 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * All the hooks for the 'lingwo_senses' module.
+ */
+
+// get our API functions for dealing with entries
+require_once(dirname(__FILE__) .'/lingwo_senses.api.inc');
+// the code for generating the bits on the node form (here for organizational purposes)
+require_once(dirname(__FILE__) .'/lingwo_senses.widget.inc');
+
+/**
+ * Implementation of hook_menu().
+ */
+function lingwo_senses_menu() {
+  $items = array();
+
+  $items['admin/settings/lingwo/senses'] = array(
+    'title' => 'Senses',
+    'description' => 'Settings for Lingwo Senses module.',
+    'access arguments' => array('administer site configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('lingwo_senses_admin_settings_form'),
+    'file' => 'lingwo_senses.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_help().
+ */
+function lingwo_senses_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#lingwo_senses':
+      return '<p>'. t('Adds support for "multiple senses" to dictionary entries.  It allows users to state how senses are different, provide examples and translate them individually.  Configure it !here.', array('!here' => l(t('here'), 'admin/settings/lingwo/senses'))) .'</p>';
+    case 'admin/settings/lingwo/senses':
+      return '<p>'. t('Configure the fields provided for each <em>sense</em> on a dictionary entry.') .'</p>';
+  }
+}
+
+/**
+ * Implementation of hook_lingwo_entry_exts().
+ */
+function lingwo_senses_lingwo_entry_properties() {
+  return array(
+    'senses' => array(
+      'class' => 'LingwoSenses',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function lingwo_senses_theme() {
+  return array(
+    'lingwo_senses_original_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'lingwo_senses.theme.inc',
+    ),
+    'lingwo_senses_translation_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'lingwo_senses.theme.inc',
+    ),
+    'lingwo_senses_original' => array(
+      'arguments' => array('node' => NULL),
+      'file' => 'lingwo_senses.theme.inc',
+    ),
+    'lingwo_senses_translation' => array(
+      'arguments' => array('node' => NULL, 'items' => NULL),
+      'file' => 'lingwo_senses.theme.inc',
+    ),
+    'lingwo_senses_relationship' => array(
+      'arguments' => array('node' => NULL, 'sense' => NULL),
+      'file' => 'lingwo_senses.theme.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function lingwo_senses_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == (LingwoEntry::$settings->content_type .'_node_form')) {
+    $node = $form['#node'];
+    if (!isset($node)) {
+      $node = (object)$form_state['node'];
+    }
+
+    $func = '_lingwo_senses_widget_'. (_lingwo_is_translation($node) ? 'translation' : 'original');
+    $form['lingwo_senses'] = $func($node);
+    $form['lingwo_senses']['#weight'] = 1;
+
+    drupal_add_js(drupal_get_path('module', 'lingwo_senses') .'/lingwo_senses.js');
+  }
+}
+
+/**
+ * Implementation of hook_content_extra_fields().
+ */
+function lingwo_senses_content_extra_fields($type_name) {
+  $extra = array();
+
+  if (LingwoEntry::$settings->content_type == $type_name) {
+    $extra['lingwo_senses'] = array(
+      'label' => t('Lingwo Senses'),
+      'description' => t('lingwo_senses module.'),
+      'weight' => 1,
+    );
+  }
+
+  return $extra;
+}
+
+function _lingwo_senses_retire_helper($item) {
+  if ($item['retire_sense']) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+function _lingwo_senses_clean(&$senses) {
+  unset($senses['wrapper']);
+
+  // retire senses
+  $senses = array_filter($senses, '_lingwo_senses_retire_helper');
+
+  $weight = array();
+  foreach ($senses as &$sense) {
+    // weight and some other extra stuff..
+    if (isset($sense['weight'])) {
+      $weight[] = $sense['weight'];
+    }
+    unset($sense['weight'], $sense['remove_sense']);
+
+    // if 'same_as' is set, then we clear the other fields
+    if (!empty($sense['data']['same_as'])) {
+      unset($sense['data']['trans']);
+      unset($sense['data']['clue']);
+    }
+    else {
+      unset($sense['data']['same_as']);
+    }
+    // clear translations on no_equivalent
+    if ($sense['data']['no_equivalent']) {
+      $sense['data']['trans'] = array();
+    }
+    else {
+      unset($sense['data']['no_equivalent']);
+    }
+    // remove empty translations
+    if (isset($sense['data']['trans'])) {
+      $sense['data']['trans'] = array_filter($sense['data']['trans']);
+    }
+
+    // if "is" is set, clear difference
+    if (!empty($sense['data']['is']['relationship'])) {
+      unset($sense['data']['difference']);
+    }
+    else {
+      unset($sense['data']['is']);
+    }
+
+    // remove empty fields
+    foreach (array('example', 'example_translation', 'clue') as $name) {
+      if (empty($sense['data'][$name])) {
+        unset($sense['data'][$name]);
+      }
+    }
+  }
+
+  if (!empty($weight) && count($weight) == count($senses)) {
+    // put in the order by weight (but only if it was given)
+    array_multisort($weight, SORT_ASC, $senses);
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function lingwo_senses_nodeapi(&$node, $op, $a3=NULL, $a4=NULL) {
+  if (!LingwoEntry::isEntryNode($node))
+    return NULL;
+
+  switch ($op) {
+    case 'load':
+      $res = db_query("SELECT data FROM {lingwo_senses_revisions} WHERE vid = %d", $node->vid);
+      if ($row = db_fetch_object($res)) {
+        return array('lingwo_senses' => unserialize($row->data));
+      }
+      break;
+
+    case 'presave':
+    case 'prepare':
+      // prepare: an unclean $node->lingwo_senses can mess up the edit form
+      // presave: clean the senses before save
+      if (!empty($node->lingwo_senses)) {
+        _lingwo_senses_clean($node->lingwo_senses);
+      }
+      break;
+
+    case 'insert':
+    case 'update':
+      $object = (object)array(
+        'nid'  => $node->nid,
+        'vid'  => $node->vid,
+        'data' => $node->lingwo_senses,
+      );
+
+      if (!empty($node->revision) || $op == 'insert' ) {
+        drupal_write_record('lingwo_senses_revisions', $object);
+      }
+      else {
+        drupal_write_record('lingwo_senses_revisions', $object, 'vid');
+      }
+      break;
+
+    case 'view':
+      $theme = 'lingwo_senses'. (_lingwo_is_translation($node) ? '_translation' : '_original');
+
+      $node->content['lingwo_senses'] = array(
+        '#value' => theme($theme, $node),
+      );
+      break;
+
+    case 'delete revision':
+      db_query("DELETE FROM {lingwo_senses_revisions} WHERE vid = %d", $node->vid);
+      break;
+
+    case 'delete':
+      db_query("DELETE FROM {lingwo_senses_revisions} WHERE nid = %d", $node->nid);
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_lingwo_locale_refresh().
+ */
+function lingwo_senses_lingwo_locale_refresh() {
+  foreach (LingwoSenses::getRelationshipOptions() as $key => $value) {
+    i18nstrings_update('lingwo:field:relationship:option_'. $key, $value);
+  }
+}
+
