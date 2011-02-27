@@ -76,7 +76,7 @@ function lingwo_entry_lookup_page($lang_pair, $word) {
   $nids = array();
   foreach ($search as $result) {
     $nid = $result->nid;
-    if ($target_lang) {
+    if ($target_lang && module_exists('translation')) {
       // find translation nodes
       $trans = translation_node_get_translations($nid);
       if ($trans[$target_lang]) {

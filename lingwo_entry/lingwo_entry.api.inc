@@ -70,9 +70,11 @@ class LingwoEntry {
   }
 
   private static function getTranslationForNid($nid, $target_lang) {
-    $trans = translation_node_get_translations($nid);
-    if ($trans[$target_lang]) {
-      return $trans[$target_lang]->nid;
+    if (module_exists('translation')) {
+      $trans = translation_node_get_translations($nid);
+      if ($trans[$target_lang]) {
+        return $trans[$target_lang]->nid;
+      }
     }
   }
 
