@@ -101,6 +101,16 @@ function lingwo_entry_node_info() {
 }
 
 /**
+ * Implementation of hook_node_type().
+ */
+function lingwo_entry_node_type($op, $info) {
+  // allow the user to rename our content type
+  if ($op == 'update' && !empty($info->old_type) && $info->old_type == LingwoEntry::$settings->content_type && $info->old_type != $info->type) {
+    LingwoEntry::$settings->content_type = $info->type;
+  }
+}
+
+/**
  * Implementation of hook_access().
  */
 function lingwo_entry_access($op, $node, $account) {
@@ -143,16 +153,6 @@ function lingwo_entry_form(&$node, $form_state) {
 }
 
 /**
- * Implementation of hook_node_type().
- */
-function lingwo_entry_node_type($op, $info) {
-  // allow the user to rename our content type
-  if ($op == 'update' && !empty($info->old_type) && $info->old_type == LingwoEntry::$settings->content_type && $info->old_type != $info->type) {
-    LingwoEntry::$settings->content_type = $info->type;
-  }
-}
-
-/**
  * Implementation of hook_validate().
  */
 function lingwo_entry_validate($node, &$form) {
@@ -165,6 +165,26 @@ function lingwo_entry_validate($node, &$form) {
           array('!link' => l($node->title, 'node/'. $existing))));
     }
   }
+}
+
+/**
+ * Implementation of hook_load().
+ */
+function lingwo_entry_load($node) {
+  if ($node->translation_source) {
+    return array('pos' => $node->translation_source->pos);
+  }
+
+  $nid = _lingwo_is_translation($node) ? $node->tnid : $node->nid;
+  $row = db_fetch_object(db_query("SELECT pos FROM {lingwo_entry} WHERE nid = %d", $nid));
+  if (!$row) {
+    // TODO: this should really be a watchdog message because it appears to happen normally when
+    // mass deleting entries.
+    watchdog('lingwo_entry', 'Unable to get pos value for this entry: !nid', array('!nid' => $nid), WATCHDOG_WARNING);
+    return NULL;
+  }
+
+  return array('pos' => $row->pos);
 }
 
 /**
@@ -311,22 +331,7 @@ function lingwo_entry_nodeapi(&$node, $op, $a3, $a4) {
     return NULL;
 
   // Operates on both translations and sources
-  if ($op == 'load') {
-    if ($node->translation_source) {
-      return array('pos' => $node->translation_source->pos);
-    }
-
-    $nid = _lingwo_is_translation($node) ? $node->tnid : $node->nid;
-    $row = db_fetch_object(db_query("SELECT pos FROM {lingwo_entry} WHERE nid = %d", $nid));
-    if (!$row) {
-      // TODO: this should really be a watchdog message because it appears to happen normally when
-      // mass deleting entries.
-      watchdog('lingwo_entry', 'Unable to get pos value for this entry: !nid', array('!nid' => $nid), WATCHDOG_WARNING);
-      return NULL;
-    }
-    return array('pos' => $row->pos);
-  }
-  elseif ($op == 'prepare translation') {
+  if ($op == 'prepare translation') {
     $node->pos = $node->translation_source->pos;
     return;
   }
