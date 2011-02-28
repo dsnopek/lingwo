@@ -153,6 +153,21 @@ function lingwo_entry_node_type($op, $info) {
 }
 
 /**
+ * Implementation of hook_validate().
+ */
+function lingwo_entry_validate($node, &$form) {
+  if (!_lingwo_is_translation($node) && !isset($node->delete)) {
+    $existing = LingwoEntry::key2nid($node->language, $node->pos, $node->title);
+
+    if ($existing && $existing != $node->nid) {
+      form_set_error('title', 
+        t('Entry with this language, part of speech and headword combination already exists: !link',
+          array('!link' => l($node->title, 'node/'. $existing))));
+    }
+  }
+}
+
+/**
  * Implementation of hook_help().
  */
 function lingwo_entry_help($path, $arg) {
@@ -338,19 +353,6 @@ function lingwo_entry_nodeapi(&$node, $op, $a3, $a4) {
 
   // The rest are only on source entries
   switch ($op) {
-    case 'validate':
-      if (isset($node->delete))
-        return NULL;
-
-      $existing = LingwoEntry::key2nid($node->language, $node->pos, $node->title);
-
-      if ($existing && $existing != $node->nid) {
-        form_set_error('title', 
-          t('Entry with this language, part of speech and headword combination already exists: !link',
-            array('!link' => l($node->title, 'node/'. $existing))));
-      }
-      break;
-
     case 'insert':
       $object = (object)array(
         'language' => $node->language,
