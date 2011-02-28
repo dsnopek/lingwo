@@ -188,6 +188,21 @@ function lingwo_entry_load($node) {
 }
 
 /**
+ * Implementation of hook_delete().
+ */
+function lingwo_entry_delete(&$node) {
+  db_query("DELETE FROM {lingwo_entry} WHERE nid = %d", $node->nid);
+
+  // delete all the translations of this node of this node as well
+  $res = db_query("SELECT nid FROM {node} WHERE tnid = %d", $node->nid);
+  while($obj = db_fetch_object($res)) {
+    if ($obj->nid != $node->nid) {
+      node_delete($obj->nid);
+    }
+  }
+}
+
+/**
  * Implementation of hook_help().
  */
 function lingwo_entry_help($path, $arg) {
@@ -336,26 +351,6 @@ function lingwo_entry_nodeapi(&$node, $op, $a3, $a4) {
     return;
   }
 
-  // Store some redundant data about translations
-  if (_lingwo_is_translation($node)) {
-    switch ($op) {
-      case 'update':
-        $key = array('nid', 'tnid');
-      case 'insert':
-        $object = (object)array(
-          'nid'  => $node->nid,
-          'tnid' => $node->tnid,
-        );
-        drupal_write_record('lingwo_entry_translation', $object, $key);
-        break;
-
-      case 'delete':
-        db_query('DELETE FROM {lingwo_entry_translation} WHERE nid = %d', $node->nid);
-        break;
-    }
-    return NULL;
-  }
-
   // The rest are only on source entries
   switch ($op) {
     case 'insert':
@@ -367,18 +362,6 @@ function lingwo_entry_nodeapi(&$node, $op, $a3, $a4) {
       );
       _lingwo_entry_generate_hash($object);
       drupal_write_record('lingwo_entry', $object);
-      break;
-
-    case 'delete':
-      // delete all the translations of this node as well
-      $res = db_query('SELECT nid FROM {lingwo_entry_translation} WHERE tnid = %d', $node->nid);
-      while($obj = db_fetch_object($res)) {
-        if ($obj->nid != $node->nid) {
-          node_delete($obj->nid);
-        }
-      }
-      db_query("DELETE FROM {lingwo_entry} WHERE nid = %d", $node->nid);
-      db_query("DELETE FROM {lingwo_entry_translation} WHERE tnid = %d", $node->tnid);
       break;
   }
 }
