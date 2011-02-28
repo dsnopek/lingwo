@@ -187,6 +187,27 @@ function lingwo_entry_load($node) {
   return array('pos' => $row->pos);
 }
 
+function _lingwo_entry_generate_hash(&$object) {
+  $object->entry_hash =
+    sha1(join(':', array($object->language, $object->pos, $object->headword)));
+}
+
+/**
+ * Implementation of hook_insert().
+ */
+function lingwo_entry_insert($node) {
+  if (!_lingwo_is_translation($node)) {
+    $object = (object)array(
+      'language' => $node->language,
+      'pos' => $node->pos,
+      'headword' => $node->title,
+      'nid' => $node->nid,
+    );
+    _lingwo_entry_generate_hash($object);
+    drupal_write_record('lingwo_entry', $object);
+  }
+}
+
 /**
  * Implementation of hook_delete().
  */
@@ -330,39 +351,16 @@ function lingwo_entry_content_extra_fields($type_name) {
   return $extra;
 }
 
-// TODO: eventually merge into hook_nodeapi() since the use in *.install will
-// be invalid after the name switch.
-function _lingwo_entry_generate_hash(&$object) {
-  $object->entry_hash =
-    sha1(join(':', array($object->language, $object->pos, $object->headword)));
-}
-
 /**
  * Implementation of hook_nodeapi().
  */
-// TODO: move to the specific node hooks!
 function lingwo_entry_nodeapi(&$node, $op, $a3, $a4) {
   if (!LingwoEntry::isEntryNode($node))
     return NULL;
 
-  // Operates on both translations and sources
   if ($op == 'prepare translation') {
     $node->pos = $node->translation_source->pos;
     return;
-  }
-
-  // The rest are only on source entries
-  switch ($op) {
-    case 'insert':
-      $object = (object)array(
-        'language' => $node->language,
-        'pos' => $node->pos,
-        'headword' => $node->title,
-        'nid' => $node->nid,
-      );
-      _lingwo_entry_generate_hash($object);
-      drupal_write_record('lingwo_entry', $object);
-      break;
   }
 }
 
