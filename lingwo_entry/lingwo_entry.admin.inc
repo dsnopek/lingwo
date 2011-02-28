@@ -19,15 +19,6 @@ function lingwo_entry_admin_settings() {
     $type_options[$type->type] = $type->name;
   }
 
-  $form[$settings->name('content_type')] = array(
-    '#type' => 'select',
-    '#title' => t('Entry Content Type'),
-    '#default_value' => $settings->content_type,
-    '#options' => $type_options,
-    '#description' => t('The content type to use as a dictionary entry.'),
-    '#required' => TRUE,
-  );
-
   $form[$settings->name('pos_allowed_values')] = array(
     '#type' => 'textarea',
     '#title' => t('Part of Speech Allowed Values'),

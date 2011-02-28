@@ -84,38 +84,17 @@ function lingwo_entry_schema() {
   return $schema;
 }
 
-function _lingwo_entry_install_entry_type_create($type_name) {
-  if (!node_get_types('type', $type_name)) {
-    $entry_type = array(
-      'type' => $type_name,
-      'name' => 'Dictionary entry',
-      'module' => 'node',
-      'description' => 'A dictionary entry.',
-      'has_title' => TRUE,
-      'title_label' => 'Headword',
-      'has_body' => FALSE,
-      'custom' => TRUE,
-      'modified' => TRUE,
-      'locked' => FALSE,
-    );
-    $entry_type = (object)_node_type_set_defaults($entry_type);
-    node_type_save($entry_type);
-    variable_set('lingwo_entry_content_type', $type_name);
-    // By default, we enable translation, with the thinking that if the user has a multi-lingual site
-    // they probably want translation, if then setting this variable will affect nothing.
-    // 2 = TRANSLATION_ENABLED.  We can't use the symbol because 'translation' might not be enabled.
-    variable_set('language_content_type_entry', 2); 
-  }
-}
-
 /**
  * Implementation of hook_install().
  */
 function lingwo_entry_install() {
   drupal_install_schema('lingwo_entry');
 
-  // install the default entry content type
-  _lingwo_entry_install_entry_type_create('entry');
+  // By default, we enable translation, with the thinking that if the user has a multi-lingual site
+  // they probably want translation, if then setting this variable will affect nothing.
+  // 2 = TRANSLATION_ENABLED.  We can't use the symbol because 'translation' might not be enabled.
+  // TODO: should we still do this?
+  //variable_set('language_content_type_lingwo_entry', 2); 
 
   // we need to happen after the "locale" module (which we would if the module name was
   // alphabetically higher) and probably after some other modules too..
@@ -127,5 +106,9 @@ function lingwo_entry_install() {
  */
 function lingwo_entry_uninstall() {
   drupal_uninstall_schema('lingwo_entry');
+
+  foreach(array_keys(LingwoEntry::$settings->getDefaults()) as $name) {
+  	variable_del('lingwo_entry_'. $name);
+  }
 }
 

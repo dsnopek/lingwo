@@ -70,6 +70,89 @@ function lingwo_entry_menu() {
 }
 
 /**
+ * Implementation of hook_perm().
+ */
+function lingwo_entry_perm() {
+  $perms[] = 'create Lingwo entry content';
+  foreach(array('source', 'translation') as $type) {
+    $perms[] = 'delete own Lingwo entry '. $type .' content';
+    $perms[] = 'delete any Lingwo entry '. $type .' content';
+    $perms[] = 'edit own Lingwo entry '. $type .' content';
+    $perms[] = 'edit any Lingwo entry '. $type .' content';
+  }
+  return $perms;
+}
+
+/**
+ * Implementation of hook_node_info().
+ */
+function lingwo_entry_node_info() {
+  $type_name = LingwoEntry::$settings->content_type;
+  $info[$type_name] = array(
+    'name' => 'Dictionary entry',
+    'module' => 'lingwo_entry',
+    'description' => 'A dictionary entry.',
+    'has_title' => TRUE,
+    'title_label' => 'Headword',
+    'has_body' => FALSE,
+    'locked' => FALSE,
+  );
+  return $info;
+}
+
+/**
+ * Implementation of hook_access().
+ */
+function lingwo_entry_access($op, $node, $account) {
+  if ($op == 'create') {
+    return user_access('create Lingwo entry content', $account);
+  }
+
+  $node = (object)$node;
+  $own = ($account->uid == $node->uid);
+  $type = _lingwo_is_translation($node) ? 'translation' : 'source';
+
+  if ($op == 'update') {
+    return user_access('edit any Lingwo entry '. $type .' content', $account) || 
+           ($own && user_access('edit own Lingwo entry '. $type .' content', $account));
+  }
+
+  if ($op == 'delete') {
+    return user_access('delete any Lingwo entry '. $type .' content', $account) || 
+           ($own && user_access('delete own Lingwo entry '. $type .' content', $account));
+  }
+}
+
+/**
+ * Implementation of hook_form().
+ */
+function lingwo_entry_form(&$node, $form_state) {
+  // use the default implementation from node.module
+  $form = node_content_form($node, $form_state);
+
+  // setup the pos select
+  $form['pos'] = array(
+    '#type' => 'select',
+    '#title' => t('Part of Speech'),
+    '#options' => LingwoEntry::getPosOptions(TRUE),
+    '#default_value' => $node->pos,
+    '#required' => TRUE,
+  );
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_node_type().
+ */
+function lingwo_entry_node_type($op, $info) {
+  // allow the user to rename our content type
+  if ($op == 'update' && !empty($info->old_type) && $info->old_type == LingwoEntry::$settings->content_type && $info->old_type != $info->type) {
+    LingwoEntry::$settings->content_type = $info->type;
+  }
+}
+
+/**
  * Implementation of hook_help().
  */
 function lingwo_entry_help($path, $arg) {
@@ -160,15 +243,6 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
       $form['language']['#required'] = TRUE;
     }
 
-    // setup the pos select
-    $form['pos'] = array(
-      '#type' => 'select',
-      '#title' => t('Part of Speech'),
-      '#options' => LingwoEntry::getPosOptions(TRUE),
-      '#default_value' => $node->pos,
-      '#required' => TRUE,
-    );
-
     // when editting a translation or existing node...
     if (isset($node->nid) || _lingwo_is_translation($node)) {
       // make title uneditable
@@ -216,6 +290,7 @@ function _lingwo_entry_generate_hash(&$object) {
 /**
  * Implementation of hook_nodeapi().
  */
+// TODO: move to the specific node hooks!
 function lingwo_entry_nodeapi(&$node, $op, $a3, $a4) {
   if (!LingwoEntry::isEntryNode($node))
     return NULL;
@@ -292,7 +367,6 @@ function lingwo_entry_nodeapi(&$node, $op, $a3, $a4) {
       $res = db_query('SELECT nid FROM {lingwo_entry_translation} WHERE tnid = %d', $node->nid);
       while($obj = db_fetch_object($res)) {
         if ($obj->nid != $node->nid) {
-          drupal_set_message(print_r($obj, TRUE));
           node_delete($obj->nid);
         }
       }

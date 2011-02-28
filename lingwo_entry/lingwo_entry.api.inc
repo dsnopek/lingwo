@@ -17,7 +17,7 @@ class LingwoEntrySettings extends LingwoSettings {
     'lookup_path' => 'dictionary',
     'node_title_munging' => TRUE,
     'redirect_node' => TRUE,
-    'content_type' => NULL,
+    'content_type' => 'lingwo_entry',
     'pos_allowed_values' => "noun\nadjective\nverb\nadverb\nother",
   );
 
