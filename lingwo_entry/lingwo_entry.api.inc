@@ -18,7 +18,7 @@ class LingwoEntrySettings extends LingwoSettings {
     'node_title_munging' => TRUE,
     'redirect_node' => TRUE,
     'content_type' => 'lingwo_entry',
-    'pos_allowed_values' => "noun\nadjective\nverb\nadverb\nother",
+    'pos_allowed_values' => "noun|Noun\nadjective|Adjective\nverb|Verb\nadverb|Adverb\nother|Other",
   );
 
   public function getDefault($name) {
