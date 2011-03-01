@@ -154,7 +154,7 @@ class LingwoEntry {
   }
 
   public static function getPosOptions($translate=FALSE, $option_name=NULL) {
-    return _lingwo_allowed_values(self::$settings, 'pos', $translation, $option_name);
+    return _lingwo_allowed_values(self::$settings, 'pos', $translate, $option_name);
   }
 
   /*
@@ -331,6 +331,38 @@ LingwoEntry::$settings = LingwoEntrySettings::get();
  * Internal functions.
  *
  */
+
+// Gets the form from hook_lingwo_language for the given module
+function _lingwo_language_form($module) {
+  $value = array();
+  $func = $module .'_lingwo_language';
+  $form = $func('form', $value);
+
+  // if we are using lingwo_language, tell the user these are just defaults
+  if (module_exists('lingwo_language')) {
+    foreach(array_keys($form) as $key) {
+      if (isset($form[$key]['#type']) && $form[$key]['#type'] != 'markup') {
+        if (!empty($form[$key]['#description'])) {
+          $form[$key]['#description'] .= ' ';
+        }
+        $form[$key]['#description'] .= '<strong>'. t('Configured per language in its definition.  These are the defaults for new language definitions.') .'</strong>';
+      }
+    }
+  }
+
+  return $form;
+}
+
+function _lingwo_language_value($settings, $name, $language) {
+  $value = NULL;
+  if (module_exists('lingwo_language')) {
+    $value = LingwoLanguage::getValue($language, $settings->name($name));
+  }
+  if (is_null($value)) {
+    $value = $settings->__get($name);
+  }
+  return $value;
+}
 
 function _lingwo_allowed_values($settings, $name, $translate=FALSE, $option_name=NULL) {
   $list = explode("\n", $settings->__get($name .'_allowed_values'));

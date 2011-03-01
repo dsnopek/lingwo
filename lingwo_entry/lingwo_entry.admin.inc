@@ -11,21 +11,10 @@
  * Settings page
  */
 function lingwo_entry_admin_settings() {
-  $form = array();
-
   $settings = LingwoEntrySettings::get();
 
-  foreach (node_get_types() as $type) {
-    $type_options[$type->type] = $type->name;
-  }
-
-  $form[$settings->name('pos_allowed_values')] = array(
-    '#type' => 'textarea',
-    '#title' => t('Part of Speech Allowed Values'),
-    '#default_value' => $settings->pos_allowed_values,
-    '#description' => t('A list of allowed values for the "Part of Speech" field.  Put one part of speech on each line.  Use the pipe symbol if you want the part of speech to have an alternate display name, for example: <em>n|Noun</em>'),
-    '#required' => TRUE,
-  );
+  // we call our own hook_lingwo_language to build the pos_allowed_values form element
+  $form = _lingwo_language_form('lingwo_entry');
 
   $form[$settings->name('node_title_munging')] = array(
     '#type' => 'checkbox',

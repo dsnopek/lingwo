@@ -1,0 +1,73 @@
+<?php
+// $Id: $
+
+/**
+ * @file
+ * Install file for lingwo_language.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function lingwo_language_schema() {
+  $schema['lingwo_language_revisions'] = array(
+    'description' => 'Stores a collection of named values for each revision of a language definition.',
+    'fields' => array(
+      'vid' => array(
+        'description' => 'The primary identifier for this version.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'nid' => array(
+        'description' => 'The {node} this version belongs to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'name' => array(
+        'description' => 'The name of the language value.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'Serialized data representing the language value.',
+        'type' => 'text',
+        'size' => 'normal',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'vid' => array('vid'),
+    ),
+    'primary key' => array('vid','name'),
+  );
+
+  return $schema;
+}
+
+
+/**
+ * Implementation of hook_install().
+ */
+function lingwo_language_install() {
+  drupal_install_schema('lingwo_language');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function lingwo_language_uninstall() {
+  drupal_uninstall_schema('lingwo_language');
+
+  foreach(LingwoLanguage::$settings->getNames() as $name) {
+    variable_del($name);
+  }
+}
+

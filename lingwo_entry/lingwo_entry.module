@@ -393,6 +393,24 @@ function lingwo_entry_lingwo_locale_refresh() {
 }
 
 /**
+ * Implementation of hook_lingwo_language().
+ */
+function lingwo_entry_lingwo_language($op, &$value) {
+  switch ($op) {
+    case 'form':
+      $value = isset($value['lingwo_entry_pos_allowed_values']) ? $value['lingwo_entry_pos_allowed_values'] : LingwoEntry::$settings->pos_allowed_values;
+      $form['lingwo_entry_pos_allowed_values'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Part of Speech Allowed Values'),
+        '#default_value' => $value,
+        '#description' => t('A list of allowed values for the "Part of Speech" field.  Put one part of speech on each line.  Use the pipe symbol if you want the part of speech to have an alternate display name, for example: <em>n|Noun</em>.'),
+        '#required' => TRUE,
+      );
+      return $form;
+  }
+}
+
+/**
  * Implementation of hook_views_api().
  */
 function lingwo_entry_views_api() {
