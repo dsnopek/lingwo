@@ -1,0 +1,84 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Implements language definitons for Lingwo
+ */
+
+// get our API functions
+require_once('lingwo_language.api.inc');
+
+/**
+ * Implementation of hook_perm().
+ */
+function lingwo_language_perm() {
+  return array (
+    'create Lingwo language definition',
+    'delete own Lingwo language definition',
+    'delete any Lingwo language definition',
+    'edit own Lingwo language definition',
+    'edit any Lingwo language definition',
+    'assign Lingwo language defintion to language'
+  );
+}
+
+/**
+ * Implementation of hook_node_info().
+ */
+function lingwo_language_node_info() {
+  $type_name = LingwoLanguage::$settings->content_type;
+  $info[$type_name] = array(
+    'name' => 'Language definition',
+    'module' => 'lingwo_language',
+    'description' => 'A language definition.',
+    'has_title' => TRUE,
+    'title_label' => 'Headword',
+    'has_body' => FALSE,
+    'locked' => FALSE,
+  );
+  return $info;
+}
+
+/**
+ * Implementation of hook_node_type().
+ */
+function lingwo_language_node_type($op, $info) {
+  // allow the user to rename our content type
+  if ($op == 'update' && !empty($info->old_type) && $info->old_type == LingwoLanguages::$settings->content_type && $info->old_type != $info->type) {
+    LingwoLanguages::$settings->content_type = $info->type;
+  }
+}
+
+/**
+ * Implementation of hook_access().
+ */
+function lingwo_language_access($op, $node, $account) {
+  if ($op == 'create') {
+    return user_access('create Lingwo language definiton', $account);
+  }
+
+  $node = (object)$node;
+  $own = ($account->uid == $node->uid);
+
+  if ($op == 'update') {
+    return user_access('edit any Lingwo language definition', $account) || 
+           ($own && user_access('edit own Lingwo language definition', $account));
+  }
+
+  if ($op == 'delete') {
+    return user_access('delete any Lingwo language definition', $account) || 
+           ($own && user_access('delete own Lingwo language definition', $account));
+  }
+}
+
+/**
+ * Implementation of hook_form().
+ */
+function lingwo_language_form(&$node, $form_state) {
+  // use the default implementation from node.module
+  $form = node_content_form($node, $form_state);
+
+  return $form;
+}
+

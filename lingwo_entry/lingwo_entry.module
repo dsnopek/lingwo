@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Implements extensions for Lingwo Dictionary
+ * Implements hooks for Lingwo entry
  */
 
 // get our API functions

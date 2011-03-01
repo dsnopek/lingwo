@@ -8,8 +8,6 @@
 
 require_once(dirname(__FILE__) .'/../includes/settings.inc');
 
-// NOTE: we name everything LingwoEntry* because this will eventually be called SomethingEntry
-
 class LingwoEntrySettings extends LingwoSettings {
   protected $base_name = 'lingwo_entry';
 

@@ -1,0 +1,6 @@
+; $Id$
+name = Lingwo language
+description = Allows creating language definitions which allow several Lingwo settings to be set per language
+package = Lingwo dictionary
+core = 6.x
+
