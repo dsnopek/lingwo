@@ -88,8 +88,15 @@ function lingwo_entry_install() {
 function lingwo_entry_uninstall() {
   drupal_uninstall_schema('lingwo_entry');
 
-  foreach(array_keys(LingwoEntry::$settings->getDefaults()) as $name) {
-  	variable_del('lingwo_entry_'. $name);
+  $entry_type = LingwoEntry::$settings->content_type;
+
+  // remove all of our variables
+  foreach(LingwoEntry::$settings->getNames() as $name) {
+  	variable_del($name);
   }
+
+  // these core variables get left behind for some reason
+  variable_del("node_options_". $entry_type);
+  variable_del("upload_". $entry_type);
 }
 

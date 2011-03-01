@@ -21,6 +21,10 @@ class LingwoSensesSettings extends LingwoSettings {
     return $this->defaults[$name];
   }
 
+  public function getNames() {
+    return array_map(array($this, 'name'), array_keys($this->defaults));
+  }
+
   public function isValid($name) {
     return array_key_exists($name, $this->defaults);
   }

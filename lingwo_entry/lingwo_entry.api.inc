@@ -25,12 +25,12 @@ class LingwoEntrySettings extends LingwoSettings {
     return $this->defaults[$name];
   }
 
-  public function isValid($name) {
-    return array_key_exists($name, $this->defaults);
+  public function getNames() {
+    return array_map(array($this, 'name'), array_keys($this->defaults));
   }
 
-  public function getDefaults() {
-    return $this->defaults;
+  public function isValid($name) {
+    return array_key_exists($name, $this->defaults);
   }
 
   // singleton boilerplate

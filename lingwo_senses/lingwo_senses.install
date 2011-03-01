@@ -56,17 +56,9 @@ function lingwo_senses_install() {
  */
 function lingwo_senses_uninstall() {
   drupal_uninstall_schema('lingwo_senses');
-}
 
-/**
- * Implementation of hook_enable().
- */
-function lingwo_senses_enable() {
-}
-
-/**
- * Implementation of hook_disable().
- */
-function lingwo_senses_disable() {
+  foreach(LingwoSenses::$settings->getNames() as $name) {
+  	variable_del($name);
+  }
 }
 
