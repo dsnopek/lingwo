@@ -44,11 +44,41 @@ function lingwo_senses_schema() {
   return $schema;
 }
 
+// Goes through all the existing entries and adds default senses to them
+function _lingwo_senses_install_default_senses() {
+  $res = db_query("SELECT nid FROM {node} WHERE type = '%s' AND (tnid = 0 OR tnid = nid OR tnid IS NULL)", LingwoEntry::$settings->content_type);
+
+  while ($obj = db_fetch_object($res)) {
+    $nids = array($obj->nid);
+    if (module_exists('translation')) {
+      $trans = translation_node_get_translations($obj->nid);
+      if (!is_null($trans)) {
+        foreach(array_values($trans) as $tnode) {
+          $nids[] = $tnode->nid;
+        }
+      }
+    }
+    _lingwo_senses_install_default_senses_one($nids);
+  }
+}
+
+// Sets up default senses for one entry with a list of nids
+function _lingwo_senses_install_default_senses_one($nids) {
+  $data = serialize(array(array('id' => _lingwo_make_uuid())));
+  $res = db_query("SELECT nid, vid FROM {node_revisions} WHERE nid IN (". db_placeholders($nids) .")", $nids);
+  while ($obj = db_fetch_object($res)) {
+    db_query("INSERT INTO {lingwo_senses_revisions} (vid, nid, data) VALUES (%d, %d, '%s')", $obj->vid, $obj->nid, $data);
+  }
+}
+
 /**
  * Implementation of hook_install().
  */
 function lingwo_senses_install() {
   drupal_install_schema('lingwo_senses');
+  
+  // give existing entries default senses
+  _lingwo_senses_install_default_senses();
 }
 
 /**
