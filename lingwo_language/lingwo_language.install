@@ -49,6 +49,29 @@ function lingwo_language_schema() {
     'primary key' => array('vid','name'),
   );
 
+  $schema['lingwo_language'] = array(
+    'description' => 'Connects lingwo_language nodes to languages.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The lingwo_language {node}.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'language' => array(
+        'description' => 'The entry on {languages}.',
+        'type' => 'varchar',
+        'length' => 12,
+        'default' => NULL,
+      ),
+    ),
+    'indexes' => array(
+      'language' => array('language'),
+    ),
+    'primary key' => array('nid'),
+  );
+
   return $schema;
 }
 
