@@ -99,7 +99,7 @@ function _lingwo_senses_widget_original($node) {
       );
       $row['data']['is']['pos'] = array(
         '#type'  => 'select',
-        '#options' => LingwoEntry::getPosOptions(TRUE),
+        '#options' => LingwoEntry::getPosOptions($node->language, TRUE),
         '#default_value' => $sense['data']['is']['pos'],
       );
     }

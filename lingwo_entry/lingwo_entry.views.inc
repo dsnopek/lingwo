@@ -13,7 +13,7 @@ function lingwo_entry_views_data() {
   return array(
     'lingwo_entry' => array(
       'table' => array(
-        'group' => t('Lingwo Dictionary'),
+        'group' => t('Lingwo dictionary'),
 
         'join' => array(
           'node' => array(

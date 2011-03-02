@@ -226,7 +226,7 @@ function theme_lingwo_senses_relationship($node, $sense) {
     $headword .'('. $pos .')'
   ));
 
-  $entry_text = $headword .' ('. LingwoEntry::getPosOptions(TRUE, $pos) .')';
+  $entry_text = $headword .' ('. LingwoEntry::getPosOptions($node->language, TRUE, $pos) .')';
   // TODO: shouldn't be a link if there is no lookup path and this node doesn't exist!
   $entry_text = l($entry_text, $path, array(
     // setup for working in the korpus reader

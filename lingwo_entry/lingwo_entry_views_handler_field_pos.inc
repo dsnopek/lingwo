@@ -7,9 +7,16 @@
  */
 
 class lingwo_entry_views_handler_field_pos extends views_handler_field {
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    $this->additional_fields['language'] = 'language';
+  }
+
   function render($values) {
     $value = $values->{$this->field_alias};
-    return LingwoEntry::getPosOptions(TRUE, $value);
+    if (!empty($value)) {
+      return LingwoEntry::getPosOptions($values->{$this->aliases['language']}, TRUE, $value);
+    }
   }
 }
 

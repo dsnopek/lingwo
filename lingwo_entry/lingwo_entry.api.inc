@@ -153,8 +153,8 @@ class LingwoEntry {
     return $results;
   }
 
-  public static function getPosOptions($translate=FALSE, $option_name=NULL) {
-    return _lingwo_allowed_values(self::$settings, 'pos', $translate, $option_name);
+  public static function getPosOptions($language, $translate=FALSE, $option_name=NULL) {
+    return _lingwo_allowed_values(self::$settings, 'pos', $language, $translate, $option_name);
   }
 
   /*
@@ -297,7 +297,7 @@ class LingwoEntry {
   public function getPos($for_humans=FALSE) {
     $node = $this->node;
     if ($for_humans) {
-      return self::getPosOptions(TRUE, $node->pos);
+      return self::getPosOptions($this->getSourceLanguage(), TRUE, $node->pos);
     }
 
     return $node->pos;
@@ -364,8 +364,8 @@ function _lingwo_language_value($settings, $name, $language) {
   return $value;
 }
 
-function _lingwo_allowed_values($settings, $name, $translate=FALSE, $option_name=NULL) {
-  $list = explode("\n", $settings->__get($name .'_allowed_values'));
+function _lingwo_allowed_values($settings, $name, $language, $translate=FALSE, $option_name=NULL) {
+  $list = explode("\n", _lingwo_language_value($settings, $name .'_allowed_values', $language));
   $list = array_map('trim', $list);
   $list = array_filter($list, 'strlen');
 

@@ -140,14 +140,9 @@ function lingwo_entry_form(&$node, $form_state) {
   // use the default implementation from node.module
   $form = node_content_form($node, $form_state);
 
-  // setup the pos select
-  $form['pos'] = array(
-    '#type' => 'select',
-    '#title' => t('Part of Speech'),
-    '#options' => LingwoEntry::getPosOptions(TRUE),
-    '#default_value' => $node->pos,
-    '#required' => TRUE,
-  );
+  // placeholder for the 'pos' element (we need to create it in hook_nodeapi() because there
+  // we have access to the the 'language' element created by the locale module.
+  $form['pos'] = array();
 
   return $form;
 }
@@ -300,8 +295,7 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
         $form['title']['#default_value'] = urldecode($_GET['headword']);
       }
       if (isset($_GET['language'])) {
-        $form['language']['#default_value'] = $_GET['language'];
-        $node->language = $_GET['language'];
+        $node->language = $form['language']['#default_value'] = $_GET['language'];
       }
       if (isset($_GET['pos']) && !_lingwo_is_translation($node)) {
         $node->pos = $_GET['pos'];
@@ -312,6 +306,34 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
     if (isset($form['language'])) {
       unset($form['language']['#options']['']);
       $form['language']['#required'] = TRUE;
+      
+      // if no language is selected, we make the first one the current language
+      if (empty($form['language']['#default_value'])) {
+        $options = array_keys($form['language']['#options']);
+        $node->language = $form['language']['#default_value'] = $options[0];
+      }
+    }
+
+    // setup the pos select
+    $form['pos'] = array(
+      '#type' => 'select',
+      '#title' => t('Part of Speech'),
+      '#options' => LingwoEntry::getPosOptions($node->language, TRUE),
+      '#default_value' => $node->pos,
+      '#required' => TRUE,
+    );
+
+    // add a reload button if different languages can have different sets of POS values
+    if (module_exists('lingwo_language')) {
+      $form['pos'] = array(
+        'pos' => $form['pos'] + array('#parents' => array('pos')),
+        'pos_reload' => array(
+          '#type' => 'submit',
+          '#value' => t('Refresh Part of Speech list'),
+          '#submit' => array('_lingwo_form_to_node'),
+          '#parents' => array('_lingwo_entry','reload_pos'),
+        ),
+      );
     }
 
     // when editting a translation or existing node...
@@ -358,9 +380,18 @@ function lingwo_entry_nodeapi(&$node, $op, $a3, $a4) {
   if (!LingwoEntry::isEntryNode($node))
     return NULL;
 
-  if ($op == 'prepare translation') {
-    $node->pos = $node->translation_source->pos;
-    return;
+  switch ($op) {
+    case 'prepare translation':
+      $node->pos = $node->translation_source->pos;
+      break;
+    /*
+    case 'presave':
+      // A hackity hack that makes view integration always work!
+      if (empty($node->tnid)) {
+        $node->tnid = $node->nid;
+      }
+      break;
+    */
   }
 }
 
@@ -387,8 +418,13 @@ function _lingwo_locale_refresh() {
  * Implementation of hook_lingwo_locale_refresh().
  */
 function lingwo_entry_lingwo_locale_refresh() {
-  foreach (LingwoEntry::getPosOptions() as $key => $value) {
-    i18nstrings_update('lingwo:field:pos:option_'. $key, $value);
+  $languages = language_list();
+  $languages = $languages[1];
+
+  foreach ($languages as $language) {
+    foreach (LingwoEntry::getPosOptions($language->language) as $key => $value) {
+      i18nstrings_update('lingwo:field:pos:option_'. $key, $value);
+    }
   }
 }
 
