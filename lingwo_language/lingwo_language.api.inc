@@ -39,6 +39,13 @@ class LingwoLanguageSettings extends LingwoSettings {
 
 class LingwoLanguage {
   public static $settings;
+
+  public static function getValue($language, $name) {
+    $res = db_query("SELECT llr.value FROM {lingwo_language} ll, {node} n, {lingwo_language_revisions} llr WHERE llr.vid = n.vid AND n.nid = ll.nid AND ll.language = '%s' AND llr.name = '%s'", $language, $name);
+    if ($obj = db_fetch_object($res)) {
+      return unserialize($obj->value);
+    }
+  }
 }
 
 LingwoLanguage::$settings = LingwoLanguageSettings::get();
