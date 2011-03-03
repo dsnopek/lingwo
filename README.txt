@@ -29,6 +29,9 @@ Installation
 
 	 - Click "Save content type"
 
+   o If you are using the views module, you may want to consider disabling the "dictionary" view
+     and enabling the "dictionary_multiple" view.
+
  * If you want to using Lingwo to manage multiple senses on each entry, enable the "lingwo_senses"
    module.
 
