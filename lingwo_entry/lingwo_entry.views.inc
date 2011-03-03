@@ -10,14 +10,27 @@
  * Implementation of hook_views_data().
  */
 function lingwo_entry_views_data() {
+  $language_defaults = array(
+    'field' => array(
+      'handler' => 'lingwo_entry_views_handler_field_language',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'lingwo_entry_views_handler_filter_language',
+    ),
+    'argument' => array(
+      'handler' => 'lingwo_entry_views_handler_argument_language',
+    ),
+  );
+
   return array(
-    'lingwo_entry' => array(
+    'lingwo_entry_info' => array(
       'table' => array(
         'group' => t('Lingwo dictionary'),
 
         'join' => array(
           'node' => array(
-            'left_field' => 'tnid',
+            'left_field' => 'nid',
             'field'      => 'nid',
           ),
         ),
@@ -38,11 +51,59 @@ function lingwo_entry_views_data() {
       'pos' => array(
         'title' => t('Part Of Speech'),
         'help' => t('The Part of Speech if this is a dictionary entry'),
-        # TODO: we need to do something to get the values for arguments
 
         'field' => array(
           'handler' => 'lingwo_entry_views_handler_field_pos',
           'click sortable' => TRUE,
+        ),
+        // TODO: This should be exposed as a select with the available POS options -- except
+        // how do we deal with multiple languages and how they have different POS values?
+        'filter' => array(
+          'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+          'handler' => 'views_handler_argument_string',
+        ),
+      ),
+
+      'language' => array(
+        'title' => t('Language'),
+        'help' => t('The language or language pair of this entry'),
+
+        'field' => array(
+          'handler' => 'lingwo_entry_views_handler_field_language_pair',
+        ),
+        // Use source_language and target_language if you want to filter!
+        /*
+        'filter' => array(
+          'handler' => 'views_handler_filter_string',
+        ),
+        */
+        'argument' => array(
+          'handler' => 'views_handler_argument_string',
+        ),
+      ),
+
+      'source_language' => array(
+        'title' => t('Source Language'),
+        'help' => t('The source language of this entry.'),
+      ) + $language_defaults,
+
+      'target_language' => array(
+        'title' => t('Target Language'),
+        'help' => t('The target language of this entry.'),
+      ) + $language_defaults,
+
+      'translation' => array(
+        'title' => t('Translation'),
+        'help' => t('A boolean indicating if this is a translation or not'),
+
+        'field' => array(
+          'handler' => 'views_handler_field_boolean',
+          'click sortable' => TRUE,
+        ),
+        'filter' => array(
+          'handler' => 'views_handler_filter_boolean_operator',
         ),
       ),
     )
@@ -60,6 +121,18 @@ function lingwo_entry_views_handlers() {
     'handlers' => array(
       'lingwo_entry_views_handler_field_pos' => array(
         'parent' => 'views_handler_field',
+      ),
+      'lingwo_entry_views_handler_field_language_pair' => array(
+        'parent' => 'views_handler_field',
+      ),
+      'lingwo_entry_views_handler_field_language' => array(
+        'parent' => 'views_handler_field',
+      ),
+      'lingwo_entry_views_handler_argument_language' => array(
+        'parent' => 'views_handler_argument',
+      ),
+      'lingwo_entry_views_handler_filter_language' => array(
+        'parent' => 'views_handler_filter_in_operator',
       ),
     ),
   );

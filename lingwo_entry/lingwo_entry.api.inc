@@ -53,6 +53,7 @@ class LingwoEntry {
   private static $MAP_NODE = array(
     'headword'       => 'title',
     'pos'            => 'pos',
+    'nid'            => 'nid',
     'language'       => 'language',
     'targetLanguage' => 'language',
   );
@@ -214,7 +215,7 @@ class LingwoEntry {
   public function __get($name) {
     $x = self::$MAP_NODE[$name];
     if (!empty($x)) {
-      return $self->node->$x;
+      return $this->node->$x;
     }
 
     $x = self::$MAP_FUNC[$name];

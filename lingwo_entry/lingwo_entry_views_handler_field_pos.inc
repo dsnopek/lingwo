@@ -9,13 +9,13 @@
 class lingwo_entry_views_handler_field_pos extends views_handler_field {
   function init(&$view, &$options) {
     parent::init($view, $options);
-    $this->additional_fields['language'] = 'language';
+    $this->additional_fields['source_language'] = 'source_language';
   }
 
   function render($values) {
     $value = $values->{$this->field_alias};
     if (!empty($value)) {
-      return LingwoEntry::getPosOptions($values->{$this->aliases['language']}, TRUE, $value);
+      return LingwoEntry::getPosOptions($values->{$this->aliases['source_language']}, TRUE, $value);
     }
   }
 }

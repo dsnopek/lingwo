@@ -47,8 +47,8 @@ function lingwo_language_node_info() {
  */
 function lingwo_language_node_type($op, $info) {
   // allow the user to rename our content type
-  if ($op == 'update' && !empty($info->old_type) && $info->old_type == LingwoLanguages::$settings->content_type && $info->old_type != $info->type) {
-    LingwoLanguages::$settings->content_type = $info->type;
+  if ($op == 'update' && !empty($info->old_type) && $info->old_type == LingwoLanguage::$settings->content_type && $info->old_type != $info->type) {
+    LingwoLanguage::$settings->content_type = $info->type;
   }
 }
 

@@ -170,50 +170,67 @@ function lingwo_entry_load($node) {
     return array('pos' => $node->translation_source->pos);
   }
 
-  $nid = _lingwo_is_translation($node) ? $node->tnid : $node->nid;
-  $row = db_fetch_object(db_query("SELECT pos FROM {lingwo_entry} WHERE nid = %d", $nid));
-  if (!$row) {
-    // TODO: this should really be a watchdog message because it appears to happen normally when
-    // mass deleting entries.
-    watchdog('lingwo_entry', 'Unable to get pos value for this entry: !nid', array('!nid' => $nid), WATCHDOG_WARNING);
-    return NULL;
+  if ($row = db_fetch_object(db_query("SELECT pos FROM {lingwo_entry_info} WHERE nid = %d", $node->nid))) {
+    return array('pos' => $row->pos);
   }
 
-  return array('pos' => $row->pos);
+  // TODO: this should really be a watchdog message because it appears to happen normally when
+  // mass deleting entries.
+  // TODO: does this still occur when mass deleting entries?
+  watchdog('lingwo_entry', 'Unable to get pos value for this entry: !nid', array('!nid' => $nid), WATCHDOG_WARNING);
 }
 
-function _lingwo_entry_generate_hash(&$object) {
-  $object->entry_hash =
-    sha1(join(':', array($object->language, $object->pos, $object->headword)));
+function _lingwo_entry_generate_hash($node) {
+  return sha1(join(':', array($node->language, $node->pos, $node->title)));
 }
 
 /**
  * Implementation of hook_insert().
  */
 function lingwo_entry_insert($node) {
-  if (!_lingwo_is_translation($node)) {
+  $entry = LingwoEntry::fromNode($node);
+  $entry_hash = _lingwo_entry_generate_hash($node);
+
+  // If its not a translation, record on the main lookup table (ensures uniqueness)
+  if (!$entry->isTranslation()) {
     $object = (object)array(
-      'language' => $node->language,
-      'pos' => $node->pos,
-      'headword' => $node->title,
-      'nid' => $node->nid,
+      'language'   => $entry->language,
+      'pos'        => $entry->pos,
+      'headword'   => $entry->headword,
+      'nid'        => $entry->nid,
+      'entry_hash' => $entry_hash,
     );
-    _lingwo_entry_generate_hash($object);
     drupal_write_record('lingwo_entry', $object);
   }
+
+  // record data on the info table
+  $object = (object)array(
+    'nid'             => $entry->nid,
+    'language'        => implode('-', $entry->getLanguages()),
+    'source_language' => $entry->sourceLanguage,
+    'target_language' => $entry->targetLanguage,
+    'pos'             => $entry->pos,
+    'translation'     => $entry->isTranslation(),
+    'entry_hash'      => $entry_hash,
+  );
+  drupal_write_record('lingwo_entry_info', $object);
 }
 
 /**
  * Implementation of hook_delete().
  */
 function lingwo_entry_delete(&$node) {
-  db_query("DELETE FROM {lingwo_entry} WHERE nid = %d", $node->nid);
+  db_query("DELETE FROM {lingwo_entry_info} WHERE nid = %d", $node->nid);
 
-  // delete all the translations of this node of this node as well
-  $res = db_query("SELECT nid FROM {node} WHERE tnid = %d", $node->nid);
-  while($obj = db_fetch_object($res)) {
-    if ($obj->nid != $node->nid) {
-      node_delete($obj->nid);
+  if (!_lingwo_is_translation($node)) {
+    db_query("DELETE FROM {lingwo_entry} WHERE nid = %d", $node->nid);
+
+    // delete all the translations of this node of this node as well
+    $res = db_query("SELECT nid FROM {node} WHERE tnid = %d", $node->nid);
+    while($obj = db_fetch_object($res)) {
+      if ($obj->nid != $node->nid) {
+        node_delete($obj->nid);
+      }
     }
   }
 }
@@ -303,7 +320,7 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
     }
 
     // remove language neutral and set language as required (for asthetic purposes)
-    if (isset($form['language'])) {
+    if (isset($form['language']) && $form['language']['#type'] == 'select') {
       unset($form['language']['#options']['']);
       $form['language']['#required'] = TRUE;
       
