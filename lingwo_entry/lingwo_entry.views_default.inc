@@ -8,6 +8,9 @@ function lingwo_entry_views_default_views() {
 
   $views = array();
 
+  /*
+   * View: dictionary
+   */
   $view = new view;
   $view->name = 'dictionary';
   $view->description = 'Dictionary listing';
@@ -17,6 +20,92 @@ function lingwo_entry_views_default_views() {
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+  $handler = $view->new_display('default', 'Defaults', 'default');
+  $handler->override_option('sorts', array(
+    'last_updated' => array(
+      'order' => 'DESC',
+      'granularity' => 'second',
+      'id' => 'last_updated',
+      'table' => 'node_comment_statistics',
+      'field' => 'last_updated',
+      'relationship' => 'none',
+    ),
+  ));
+  $handler->override_option('filters', array(
+    'type' => array(
+      'operator' => 'in',
+      'value' => array(
+        $entry_type => $entry_type,
+      ),
+      'group' => '0',
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
+        'label' => '',
+      ),
+      'id' => 'type',
+      'table' => 'node',
+      'field' => 'type',
+      'relationship' => 'none',
+    ),
+    'status' => array(
+      'operator' => '=',
+      'value' => '1',
+      'group' => '0',
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
+        'label' => '',
+      ),
+      'id' => 'status',
+      'table' => 'node',
+      'field' => 'status',
+      'relationship' => 'none',
+    ),
+  ));
+  $handler->override_option('access', array(
+    'type' => 'perm',
+    'perm' => 'access content',
+  ));
+  $handler->override_option('cache', array(
+    'type' => 'none',
+  ));
+  $handler->override_option('title', 'Dictionary');
+  $handler->override_option('empty', 'There are no entries in the dictionary.');
+  $handler->override_option('empty_format', '1');
+  $handler->override_option('use_pager', '1');
+  $handler->override_option('row_plugin', 'node');
+  $handler = $view->new_display('page', 'Page', 'page_1');
+  $handler->override_option('path', 'dictionary');
+  $handler->override_option('menu', array(
+    'type' => 'normal',
+    'title' => 'Dictionary',
+    'description' => 'List of entries in the dictionary',
+    'weight' => '0',
+    'name' => 'navigation',
+  ));
+  $handler->override_option('tab_options', array(
+    'type' => 'none',
+    'title' => '',
+    'description' => '',
+    'weight' => 0,
+    'name' => 'navigation',
+  ));
+
+  $views[$view->name] = $view;
+
+  /*
+   * View: dictionary_multiple
+   */
+  $view = new view;
+  $view->name = 'dictionary_multiple';
+  $view->description = 'Dictionary listing';
+  $view->tag = 'lingwo';
+  $view->view_php = '';
+  $view->base_table = 'node';
+  $view->is_cacheable = FALSE;
+  $view->api_version = 2;
+  $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('sorts', array(
     'last_updated' => array(
@@ -128,8 +217,8 @@ function lingwo_entry_views_default_views() {
   $handler->override_option('path', 'dictionary');
   $handler->override_option('menu', array(
     'type' => 'normal',
-    'title' => 'Dictionary',
-    'description' => 'List of entries in the dictionary',
+    'title' => 'Dictionaries',
+    'description' => 'List of dictionaries and their entries.',
     'weight' => '0',
     'name' => 'navigation',
   ));
