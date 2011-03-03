@@ -80,7 +80,7 @@ function lingwo_entry_views_data() {
         ),
         */
         'argument' => array(
-          'handler' => 'views_handler_argument_string',
+          'handler' => 'lingwo_entry_views_handler_argument_language_pair',
         ),
       ),
 
@@ -124,6 +124,9 @@ function lingwo_entry_views_handlers() {
       ),
       'lingwo_entry_views_handler_field_language_pair' => array(
         'parent' => 'views_handler_field',
+      ),
+      'lingwo_entry_views_handler_argument_language_pair' => array(
+        'parent' => 'views_handler_argument',
       ),
       'lingwo_entry_views_handler_field_language' => array(
         'parent' => 'views_handler_field',

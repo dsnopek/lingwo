@@ -132,11 +132,15 @@ function lingwo_entry_schema() {
 function lingwo_entry_install() {
   drupal_install_schema('lingwo_entry');
 
+  require_once('lingwo_entry.api.inc');
+  $entry_type = LingwoEntry::$settings->content_type;
+
   // By default, we enable translation, with the thinking that if the user has a multi-lingual site
   // they probably want translation, if then setting this variable will affect nothing.
   // 2 = TRANSLATION_ENABLED.  We can't use the symbol because 'translation' might not be enabled.
-  // TODO: should we still do this?
-  //variable_set('language_content_type_lingwo_entry', 2); 
+  variable_set('language_content_type_'. $entry_type, 2); 
+  // By default, we don't want to promote dictionary entries to the front page.
+  variable_set('node_options_'. $entry_type, array('status'));
 
   // we need to happen after the "locale" module (which we would if the module name was
   // alphabetically higher) and probably after some other modules too..
