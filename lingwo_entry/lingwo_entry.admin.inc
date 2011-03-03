@@ -17,10 +17,14 @@ function lingwo_entry_admin_settings() {
   $form = _lingwo_language_form('lingwo_entry');
 
   $form[$settings->name('node_title_munging')] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Add language and part of speech information to entry node titles'),
+    '#type' => 'checkboxes',
+    '#title' => t('Add extra information to the node title'),
+    '#options' => array(
+      'language' => t('Language'),
+      'pos'      => t('Part of Speech'), 
+    ),
     '#default_value' => $settings->node_title_munging,
-    '#description' => t('If you activate this option, language and part of speech information will be added to entry node titles.  To include the same information in more customized way, disable this option and add it in your theme.'),
+    '#description' => t('Activate this option to add extra information to the node title.  To include the same information in more customized way, disable this option and implement it in your theme.'),
   );
 
   $form[$settings->name('lookup_path')] = array(

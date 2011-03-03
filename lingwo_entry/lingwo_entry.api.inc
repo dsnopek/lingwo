@@ -13,7 +13,7 @@ class LingwoEntrySettings extends LingwoSettings {
 
   private $defaults = array(
     'lookup_path' => 'dictionary',
-    'node_title_munging' => TRUE,
+    'node_title_munging' => array('language' => TRUE, 'pos' => TRUE),
     'redirect_node' => TRUE,
     'content_type' => 'lingwo_entry',
     'pos_allowed_values' => "noun|Noun\nadjective|Adjective\nverb|Verb\nadverb|Adverb\nother|Other",

@@ -319,16 +319,30 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
       }
     }
 
-    // remove language neutral and set language as required (for asthetic purposes)
-    if (isset($form['language']) && $form['language']['#type'] == 'select') {
-      unset($form['language']['#options']['']);
-      $form['language']['#required'] = TRUE;
-      
-      // if no language is selected, we make the first one the current language
-      if (empty($form['language']['#default_value'])) {
-        $options = array_keys($form['language']['#options']);
-        $node->language = $form['language']['#default_value'] = $options[0];
+    // modify the language element so that the node *must* have a language
+    if (isset($form['language'])) {
+      if ($form['language']['#type'] == 'select') {
+        // remove language neutral and set language as required
+        unset($form['language']['#options']['']);
+        $form['language']['#required'] = TRUE;
+        
+        // if no language is selected, we make the first one the current language
+        if (empty($form['language']['#default_value'])) {
+          $options = array_keys($form['language']['#options']);
+          $node->language = $form['language']['#default_value'] = $options[0];
+        }
       }
+      else if ($form['language']['#type'] == 'value' && empty($form['language']['#value'])) {
+        $node->language = $form['language']['#value'] = language_default('language');
+      }
+    }
+    else {
+      // this will happen if not even 'locale' is enabled
+      $node->language = language_default('language');
+      $form['language'] = array(
+        '#type' => 'value',
+        '#value' => $node->language,
+      );
     }
 
     // setup the pos select
@@ -494,7 +508,8 @@ function lingwo_entry_preprocess_node(&$vars) {
     }
 
     // if enabled, we'll munge the node_title to include
-    if (LingwoEntry::$settings->node_title_munging) {
+    $munging = LingwoEntry::$settings->node_title_munging;
+    if ($munging['language'] || $munging['pos']) {
       $lang_spec_text = '['. implode(' &#8594; ', $vars['languages_human']) .']';
       if (isset($vars['languages_icons'])) {
         $lang_spec_images = implode(' &#8594; ', $vars['languages_icons']);
@@ -503,13 +518,24 @@ function lingwo_entry_preprocess_node(&$vars) {
         $lang_spec_images = str_replace('"', "'", $lang_spec_images);
       }
 
-      $vars['title'] = (isset($lang_spec_images) ? $lang_spec_images : $lang_spec_text) .' '. $vars['title'];
-      $vars['title'] .= ' ('. $vars['pos'] .')';
+      if ($munging['language']) {
+        $vars['title'] = (isset($lang_spec_images) ? $lang_spec_images : $lang_spec_text) .' '. $vars['title'];
+      }
+      if ($munging['pos']) {
+        $vars['title'] .= ' ('. $vars['pos'] .')';
+      }
 
+      // completely replace head_title if necessary
       if (isset($vars['head_title'])) {
-        $head_title[] = $lang_spec_text .' '. check_plain($vars['node']->title) .' ('. $vars['pos'] .')';
-        $head_title[] = variable_get('site_name', 'Drupal');
-        $vars['head_title'] = implode(' | ', $head_title);
+        if ($munging['language']) {
+          $head_title = $lang_spec_text .' ';
+        }
+        $head_title .= check_plain($vars['node']->title);
+        if ($munging['pos']) {
+          $head_title .= ' ('. $vars['pos'] .')';
+        }
+
+        $vars['head_title'] = implode(' | ', array($head_title, variable_get('site_name', 'Drupal')));
       }
 
       // let the template know that we did this nastiness!
