@@ -1,0 +1,96 @@
+<?php
+// $Id: $
+
+/**
+ * @file
+ * Install file for lingwo_fields.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function lingwo_fields_schema() {
+  $schema['lingwo_fields_revisions'] = array(
+    'description' => 'Stores the fields data for a revision of a given entry',
+    'fields' => array(
+      'vid' => array(
+        'description' => 'The primary identifier for this version.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'nid' => array(
+        'description' => 'The {node} this version belongs to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'data' => array(
+        'description' => 'Serialized data representing the fields.',
+        'type' => 'text',
+        'size' => 'normal',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array('nid'),
+    ),
+    'primary key' => array('vid'),
+  );
+
+  $schema['lingwo_fields_forms'] = array(
+    'description' => 'A lookup table for finding entries based on their forms.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The {node} that this form is from.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'form' => array(
+        'description' => 'The form of the of this entry.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'form_name' => array(
+        'description' => 'The name of this form.',
+        'type' => 'varchar',
+        'length' => '255',
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'form' => array('form'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function lingwo_fields_install() {
+  drupal_install_schema('lingwo_fields');
+
+  // we need to happen after the lingwo_entry module with weight 50
+  update_sql("UPDATE {system} SET weight = 51 WHERE name = 'lingwo_fields'");
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function lingwo_fields_uninstall() {
+  drupal_uninstall_schema('lingwo_fields');
+
+  // remove all of our variables
+  foreach(LingwoFields::$settings->getNames() as $name) {
+    variable_del($name);
+  }
+}
+

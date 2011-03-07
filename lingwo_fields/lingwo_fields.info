@@ -1,0 +1,7 @@
+; $Id$
+name = Lingwo fields
+description = Adds support for fields to the dictionary entry, which are different for each language and part of speech.
+package = Lingwo dictionary
+core = 6.x
+dependencies[] = lingwo_entry
+

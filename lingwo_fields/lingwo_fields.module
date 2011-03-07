@@ -1,0 +1,634 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Implements a CCK field for dictionary entries, which will be different for each language and part of speech
+ */
+
+require_once('lingwo_fields.api.inc');
+
+/**
+ * Implementation of hook_lingwo_entry_ext().
+ */
+function lingwo_fields_lingwo_entry_properties() {
+  return array(
+    'fields' => array(
+      'class' => 'LingwoFields',
+    ),
+  );
+}
+
+// API function to find all the entries which match this form.  This is a pair to
+// LingwoEntry::search() (it is, in fact, used by that function)
+function lingwo_fields_search_forms($text, $options=array()) {
+  $results = array();
+
+  $sql = "SELECT f.nid, f.form_name, e.headword, e.pos, e.language FROM {lingwo_fields_forms} f ".
+         "INNER JOIN {lingwo_entry} e ON f.nid = e.nid";
+  $where = " WHERE form = '%s'";
+  $args = array($text);
+
+  if (!empty($options['language'])) {
+    #$sql .= " INNER JOIN {node} n ON f.nid = n.nid";
+    $where .= " AND e.language = '%s'";
+    $args[] = $options['language'];
+  }
+  if (!empty($options['pos'])) {
+    $where .= " AND e.pos = '%s'";
+    $args[] = $options['pos'];
+  }
+
+  $res = db_query($sql . $where, $args);
+  while ($obj = db_fetch_object($res)) {
+    $obj->exact = TRUE;
+    $results[] = $obj;
+  }
+
+  return $results;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function lingwo_fields_theme() {
+  return array(
+    'lingwo_fields_widget_form_wrapper' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'lingwo_fields_widget_form' => array(
+      'arguments' => array('element' => NULL),
+      'pattern' => 'lingwo_fields_widget_form_',
+    ),
+    'lingwo_fields_formatter_default' => array(
+      'arguments' => array('node' => NULL),
+    ),
+    'lingwo_fields_view' => array(
+      'arguments' => array('element' => NULL),
+      'pattern' => 'lingwo_fields_view_',
+    ),
+  );
+}
+
+/*
+ * Implementation of hook_form_alter().
+ */
+function lingwo_fields_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == (LingwoEntry::$settings->content_type .'_node_form')) {
+    $node = $form['#node'];
+    $entry = LingwoEntry::fromNode($node);
+    if (!$entry->isTranslation()) {
+      // only applies to entries that are not translations
+      $form['lingwo_fields'] = lingwo_fields_widget($form, $form_state, $entry);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_content_extra_fields().
+ */
+function lingwo_fields_content_extra_fields($type_name) {
+  $extra = array();
+
+  if (LingwoEntry::$settings->content_type == $type_name) {
+    $extra['lingwo_fields'] = array(
+      'label' => t('Lingwo Fields'),
+      'description' => t('lingwo_fields module.'),
+      'weight' => 1,
+    );
+  }
+
+  return $extra;
+}
+
+function _lingwo_fields_clean(&$items) {
+  foreach ($items as &$item) {
+    unset($item['remove']);
+
+    if ($item['type'] == 'class') {
+      $item['value'] = intval($item['value']);
+    }
+    $item['automatic'] = (bool)$item['automatic'];
+
+    if (isset($item['alt'])) {
+      $item['alt'] = array_filter($item['alt']);
+      if (count($item['alt']) == 0) {
+        unset($item['alt']);
+      }
+    }
+  }
+}
+
+
+function _lingwo_fields_write_record($fields, $is_update) {
+  if ($is_update) {
+    drupal_write_record('lingwo_fields_revisions', $fields, 'vid');
+  }
+  else {
+    drupal_write_record('lingwo_fields_revisions', $fields);
+  }
+
+  # update our lookup table!
+  # TODO: in the future we will have many more lookup tables!
+  db_query('DELETE FROM {lingwo_fields_forms} WHERE nid = %d', $fields->nid);
+  foreach ($fields->data as $field) {
+    if ($field['type'] == 'form') {
+      $values = array($field['value']);
+      if (isset($field['alt'])) {
+        $values = array_merge($values, $field['alt']);
+      }
+
+      foreach ($values as $value) {
+        // don't add an empty value!
+        if (is_null($value) || $value == '') continue;
+
+        $form = (object)array(
+          'nid'       => $fields->nid,
+          'form'      => $value,
+          'form_name' => $field['name'],
+        );
+        drupal_write_record('lingwo_fields_forms', $form);
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function lingwo_fields_nodeapi(&$node, $op, $a3=NULL, $a4=NULL) {
+  // only applies to entries
+  if ($node->type != LingwoEntry::$settings->content_type)
+    return NULL;
+
+  // view should happen for both sources and translations (but only when showing a page)
+  if ($op == 'view' && $a4) {
+    $node->content['lingwo_fields'] = array(
+      '#value' => theme('lingwo_fields_formatter_default', $node),
+    );
+  }
+
+  // the rest only apply to sources
+  if (_lingwo_is_translation($node))
+    return NULL;
+
+  switch ($op) {
+    case 'load':
+      $res = db_query("SELECT data FROM {lingwo_fields_revisions} WHERE vid = %d", $node->vid);
+      $lingwo_fields = array();
+      if ($row = db_fetch_object($res)) {
+        if (!empty($row->data)) {
+          $lingwo_fields = unserialize($row->data);
+        }
+      }
+      return array('lingwo_fields' => $lingwo_fields);
+      break;
+
+    case 'presave':
+    case 'prepare':
+      if (!empty($node->lingwo_fields)) {
+        _lingwo_fields_clean($node->lingwo_fields);
+      }
+      elseif (!isset($node->lingwo_fields) || is_null($node->lingwo_fields)) {
+        $node->lingwo_fields = array();
+      }
+      break;
+
+    case 'insert':
+    case 'update':
+      $object = (object)array(
+        'nid'  => $node->nid,
+        'vid'  => $node->vid,
+        'data' => $node->lingwo_fields,
+      );
+
+      _lingwo_fields_write_record($object, empty($node->revision) && $op == 'update');
+      break;
+
+    case 'delete revision':
+      db_query("DELETE FROM {lingwo_fields_revisions} WHERE vid = %s", $node->vid);
+      break;
+
+    case 'delete':
+      db_query("DELETE FROM {lingwo_fields_revisions} WHERE nid = %s", $node->nid);
+      db_query("DELETE FROM {lingwo_fields_forms}     WHERE nid = %s", $node->nid);
+      break;
+  }
+}
+
+function lingwo_fields_widget(&$form, &$form_state, $entry) {
+  //ahah_helper_register($form, $form_state);
+
+  $node =& $entry->getNode();
+  $pos = $node->pos;
+  if (empty($pos)) {
+    $pos = array_keys($form['pos']['#options']);
+    $pos = $pos[0];
+    $node->pos = $pos;
+  }
+  $language = $node->language;
+  if (empty($language)) {
+    $language = array_keys($form['language']['#options']);
+    $language = $language[0];
+    $node->language = $language;
+  }
+  if ($old_pair = $form_state['values']['_lingwo_fields']['old_pair']) {
+    if ($old_pair != implode(':', array($language, $pos))) {
+      // clear the fields, because we just changed the language or pos!
+      $node->lingwo_fields = array();
+    }
+  }
+  $fields = $entry->fields;
+
+  // add the from to our form list (we have to do this here because in AHAH we can't
+  // do it in the submit handler)
+  
+  if ($form_state['clicked_button']['#value'] == t('Add new form')) {
+    $value = $form_state['values']['_lingwo_fields']['add_new_form'];
+    if (!empty($value['value'])) {
+      $fields->addForm($value['name'], $value['value']);
+    }
+  }
+  
+  // record if we are supposed to add an extra value to a field
+  $extra_value = $form_state['values']['_lingwo_fields']['extra_value'];
+
+  $element = array(
+    '#type'  => 'fieldset',
+    '#title' => t('Fields'),
+    '#theme' => 'lingwo_fields_widget_form_wrapper',
+    '#tree'  => TRUE,
+  );
+
+  /*
+  $ahah = array(
+    //'event' => 'change',
+    'path' => ahah_helper_path(array('lingwo_fields', 'wrapper')),
+    //'path' => 'lingwo_fields/ahah/'. $field_name,
+    'wrapper' => 'lingwo_fields-wrapper',
+    //'effect' => 'fade',
+    'effect' => 'none',
+  );
+  */
+
+  // If this node is new, then add the AHAH which will activate when language
+  // or pos are changed.
+  if (!$node->nid) {
+    /*
+    $form['language']['#ahah'] = $ahah; // + array('event' => 'change');
+    $form['pos']['#ahah'] = $ahah;
+    */
+  }
+
+  $element['wrapper'] = array(
+    '#prefix' => '<div id="lingwo_fields-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $element['wrapper']['fields'] = array(
+    '#theme' => array(
+      'lingwo_fields_widget_form_'. $node->language .'_'. $pos,
+      'lingwo_fields_widget_form_'. $node->language, 
+      'lingwo_fields_widget_form'
+    ),
+    '#parents' => array('lingwo_fields'),
+  );
+
+  $field_map = array(
+    'classes' => array(),
+    'options' => array(),
+    'forms' => array()
+  );
+
+  foreach ($fields as $name => $field) {
+    // skip it was marked for removal
+    if ($form_state['values']['lingwo_fields'][$name]['remove']) continue;
+
+    $def = $field['definition'];
+    unset($field['definition']);
+
+    $control_tag  = '<div ';
+    $control_tag .= 'class="lingwo-fields-control" ';
+    $control_tag .= 'data-type="'. $field['type'] .'" ';
+    $control_tag .= 'data-name="'. $name .'" ';
+    if (!empty($def)) {
+      $control_tag .= 'data-has-definition="true" ';
+    }
+    $control_tag .= '>';
+
+    $field_form = array(
+      '#prefix' => $control_tag,
+      '#suffix' => '</div>',
+      '#item'   => $field,
+    );
+    $field_form['name'] = array(
+      '#type' => 'hidden',
+      '#value' => $name,
+    );
+    $field_form['type'] = array(
+      '#type' => 'hidden',
+      '#value' => $field['type'],
+    );
+
+    $field_form['value'] = array(
+      '#title' => isset($def['label']) ? $def['label'] : $name,
+      '#default_value' => $field['value'],
+      // TODO: we need to enforce required with select boxes
+      '#required' => $def['required'] ? TRUE : FALSE,
+      '#attributes' => array(
+        'class' => 'lingwo-fields-value',
+      ),
+      '#description' => $def['description'],
+    );
+
+    switch ($field['type']) {
+      case 'class':
+        $field_form['value'] += array(
+          '#type' => 'select',
+          '#options' => array(
+            0 => t('False'),
+            1 => t('True'),
+          ),
+        );
+        break;;
+      case 'option':
+        $options = $def['options'];
+        $options = array('' => '-none-') + $options;
+
+        $field_form['value'] += array(
+          '#type' => 'select',
+          '#options' => $options,
+        );
+        break;;
+      case 'form':
+        $field_form['value'] += array(
+          '#type' => 'textfield',
+        );
+        break;;
+    };
+
+    $alt = $field['alt'];
+    if ($extra_value == $name) {
+      $alt[] = '';
+    }
+    # since only forms can have multiple values, these are always
+    # textfields.
+    if (!empty($alt)) {
+      foreach ($alt as $value) {
+        $field_form['alt'][] = array(
+          '#type' => 'textfield',
+          '#default_value' => $value,
+          '#attributes' => array(
+            'class' => 'lingwo-fields-value',
+          ),
+        );
+      }
+    }
+
+    if ($name == '_noname_') {
+      $field_form['value']['#type'] = 'hidden';
+      $field_form['alt'][0]['#title'] = t('Un-named forms');
+    }
+
+    if (empty($def)) {
+      $field_form['remove'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Remove'),
+        //'#ahah' => $ahah + array('event' => 'click'),
+      );
+    }
+    else {
+      $field_form['automatic'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Automatic'),
+        '#default_value' => $field['automatic'],
+      );
+    }
+
+    $element['wrapper']['fields'][$name] = $field_form;
+  }
+
+  if (count($element['wrapper']['fields']) == 0) {
+    $element['wrapper']['placeholder'] = array(
+      '#type' => 'markup',
+      '#value' => '<p>'. t('No fields for this Language and Part of Speech') .'</p>'
+    );
+  }
+
+  $_lingwo_fields = array(
+    '#parents' => array('_lingwo_fields'),
+    '#tree' => TRUE,
+  );
+
+  // for detecting a language/pos change
+  $_lingwo_fields['old_pair'] = array(
+    '#type' => 'hidden',
+    '#value' => implode(':', array($language, $pos)),
+  );
+
+  // for adding multiple forms
+  $_lingwo_fields['extra_value'] = array(
+    '#type' => 'hidden',
+  );
+
+  // for adding non-standard forms
+  $_lingwo_fields['add_new_form'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Extra Form').':',
+    '#attributes' => array(
+      'id' => 'edit--lingwo-fields-add-new-form',
+    ),
+  );
+  $_lingwo_fields['add_new_form']['name'] = array(
+    '#type' => 'textfield',
+    '#default_value' => '_noname_',
+    '#attributes' => array(
+      'class' => "lingwo-fields-name",
+    ),
+  );
+  $_lingwo_fields['add_new_form']['value'] = array(
+    '#type' => 'textfield',
+  );
+  $_lingwo_fields['add_new_form']['add_new_form'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add new form'),
+    '#submit' => array('lingwo_fields_submit_add_new_form'),
+    //'#ahah' => $ahah + array('event' => 'click')
+  );
+
+  // for reloading the current values
+  $_lingwo_fields['refresh'] = array(
+    '#type' => 'submit',
+    '#value' => t('Refresh'),
+    '#submit' => array('lingwo_fields_submit_change_pos_submit'),
+    //'#ahah' => $ahah + array('event' => 'click'),
+    '#parents' => array('_lingwo_fields','refresh'),
+  );
+
+  $element['wrapper']['_lingwo_fields'] = $_lingwo_fields;
+
+  // for the theme function
+  $element['#node'] = $node;
+  $element['#pos'] = $pos;
+
+  return $element;
+}
+
+function theme_lingwo_fields_widget_form_wrapper($element) {
+  $node = $element['#node'];
+
+  _ld_add_require_js();
+
+  drupal_add_js(drupal_get_path('module', 'lingwo_fields') .'/lingwo_fields.js');
+  drupal_add_css(drupal_get_path('module', 'lingwo_fields') .'/lingwo_fields.css');
+
+  return drupal_render($element); 
+}
+
+// TODO: now that we are using ahah_helper, this should be removed
+/*
+function lingwo_fields_ahah($field_name) {
+  module_load_include('inc', 'node', 'node.pages');
+  $form_state = array('storage' => NULL, 'submitted' => FALSE);
+  $form_build_id = $_POST['form_build_id'];
+
+  $form = form_get_cache($form_build_id, $form_state);
+
+  _ld_disable_validation($form);
+
+  $args = $form['#parameters'];
+  $form_id = array_shift($args);
+  $form_state['post'] = $form['#post'] = $_POST;
+  $form['#post']['form_id'] = $form_id;
+  $form['#programmed'] = $form['#redirect'] = FALSE;
+
+  // DRS: prevents submit, not sure what other consequences this has
+  $form_state['rebuild'] = TRUE;
+
+  drupal_process_form($form_id, $form, $form_state);
+  $node = _lingwo_form_to_node($form, $form_state);
+
+  $form = drupal_rebuild_form($form_id, $form_state, $args, $form_build_id);
+
+  $element = $form[$field_name]['wrapper']; 
+  unset($element['#prefix'], $element['#suffix']);
+  $output = theme('status_messages') . drupal_render($element);
+
+  drupal_json(array('status' => TRUE, 'data' => $output));
+}
+*/
+
+function lingwo_fields_submit_change_pos_submit($form, &$form_state) {
+  // TODO: should we really do this?
+  $node = _lingwo_form_to_node($form, $form_state);
+}
+
+function lingwo_fields_submit_add_new_form($form, &$form_state) {
+  // TODO: should we really do this?
+  $node =& _lingwo_form_to_node($form, $form_state);
+
+  // Unfortunately, with AHAH this doesn't work...
+  /*
+  $value = $form_state['values']['_lingwo_fields']['add_new_form'];
+  unset($value['add_new_form']);
+  $node['lingwo_fields'][$value['name']] = $value;
+
+  // we need to clean the input
+  _lingwo_fields_clean($node['lingwo_fields']);
+  */
+}
+
+/*
+ * Our "API" functions
+ */
+// creates a special map of FAPI items for use by the themes
+function lingwo_fields_map_items(&$items) {
+  $map = array(
+    ':classes' => array(),
+    ':options' => array(),
+    ':forms'   => array(),
+  );
+
+  foreach (element_children($items) as $index) {
+    // From the formatter them function we get $items[$index]['#item'] but if we just toss
+    // $node->lingwo_fields in here, we get $items[$index] -- both modes are supported.
+    $item_info = $items[$index]['#item'] ? $items[$index]['#item'] : $items[$index];
+    $type = $item_info['type'];
+    $name = $item_info['name'];
+
+    // put into the basic flat map
+    $map[$name] = &$items[$index];
+    // and group by type
+    $type .= ($type == 'class') ? 'es' : 's';
+    $map[':'. $type][] = &$items[$index];
+  }
+
+  return $map;
+}
+
+/*
+ * Theming
+ */
+
+function template_preprocess_lingwo_fields_widget_form(&$vars) {
+  $vars['fields'] = lingwo_fields_map_items($vars['element']);
+}
+
+function theme_lingwo_fields_widget_form($element) {
+  return drupal_render($element);
+}
+
+function theme_lingwo_fields_formatter_default($node) {
+  $entry = LingwoEntry::fromNode($node);
+
+  if ($source_node = $entry->getTranslationSource()) {
+    // display the fields as if this were the source node (with the source nodes
+    // language) and not a member of this language
+    $entry = LingwoEntry::fromNode($source_node);
+    $node = $source_node;
+  }
+
+  // fill element with real FAPI elements that simple display the item
+  $element = array();
+  foreach ($entry->fields as $name => $field) {
+    $def = $field['definition'];
+    if ($name == '_noname_') {
+      $label = t('Un-named forms');
+    }
+    else {
+      $label = isset($def['label']) ? $def['label'] : $name;
+    }
+
+    $value = $field['value'];
+    if (isset($field['alt'])) {
+      if ($value != '') {
+        $value = array($value);
+      }
+      else {
+        $value = array();
+      }
+      $value = implode(', ', array_merge($value, $field['alt']));
+    }
+
+    $element[] = array(
+      '#type' => 'item',
+      '#title' => $label,
+      '#value' => $value,
+      '#item'  => $field,
+    );
+  }
+
+  return theme(array(
+      'lingwo_fields_view_'. $node->language .'_'. $node->pos,
+      'lingwo_fields_view_'. $node->language, 
+      'lingwo_fields_view'
+  ), $element);
+}
+
+function template_preprocess_lingwo_fields_view(&$vars) {
+  $vars['fields'] = lingwo_fields_map_items($vars['element']);
+}
+
+function theme_lingwo_fields_view($element) {
+  return drupal_render($element);
+}
+
