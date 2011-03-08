@@ -89,7 +89,7 @@ function lingwo_fields_uninstall() {
   drupal_uninstall_schema('lingwo_fields');
 
   // remove all of our variables
-  foreach(LingwoFields::$settings->getNames() as $name) {
+  foreach (LingwoFields::$settings->getNames() as $name) {
     variable_del($name);
   }
 }

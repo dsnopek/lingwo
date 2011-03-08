@@ -146,8 +146,7 @@ class LingwoEntry {
 
     // then get all the fields matches
     if (module_exists('lingwo_fields')) {
-      // TODO: this should be renamed to LingwoFields::searchForms(...)
-      $ret = lingwo_fields_search_forms($text, $options);
+      $ret = LingwoFields::searchForms($text, $options);
       $results = array_merge($results, $ret);
     }
 

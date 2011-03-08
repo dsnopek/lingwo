@@ -6,10 +6,10 @@
  * All the hooks for the 'lingwo_senses' module.
  */
 
-// get our API functions for dealing with entries
-require_once(dirname(__FILE__) .'/lingwo_senses.api.inc');
+// get our API functions for dealing with senses
+require_once('lingwo_senses.api.inc');
 // the code for generating the bits on the node form (here for organizational purposes)
-require_once(dirname(__FILE__) .'/lingwo_senses.widget.inc');
+require_once('lingwo_senses.widget.inc');
 
 /**
  * Implementation of hook_menu().

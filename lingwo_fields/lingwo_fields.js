@@ -220,8 +220,8 @@
         var pos  = $('#edit-pos :selected').val();
 
         require(
-            ['lingwo_dictionary/languages/'+lang,
-             'lingwo_dictionary/Entry'],
+            ['lingwo/languages/'+lang,
+             'lingwo/Entry'],
             function (lang, Entry) {
                 // this will be run every time the AHAH completes, so we need to rebuild
                 // the entry object.

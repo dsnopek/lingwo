@@ -12,7 +12,9 @@ class LingwoFieldsSettings extends LingwoSettings {
   protected $base_name = 'lingwo_fields';
 
   private $defaults = array(
-    'fields' => array(),
+    'fields' => array(
+      'javascript' => "// Generate alphabet for this language\nlang.alphabet = Language.generateAlphabet('abcdefghijklmnopqrstuvwxyz', ['ch','sh','th'], function (l) { return 'aeiou'.indexOf(l) == -1 ? ['consonant'] : ['vowel'] });\n\n// Here you can declare some functions for later use!\n\n"
+    ),
   );
 
   public function getDefault($name) {
@@ -38,7 +40,73 @@ class LingwoFieldsSettings extends LingwoSettings {
 }
 
 class LingwoFields implements IteratorAggregate {
+  /*
+   * 
+   * Static properties/methods
+   * =========================
+   *
+   */
+
   public static $settings;
+
+  public static function searchForms($text, $options=array()) {
+    $results = array();
+
+    $sql = "SELECT f.nid, f.form_name, e.headword, e.pos, e.language FROM {lingwo_fields_forms} f ".
+           "INNER JOIN {lingwo_entry} e ON f.nid = e.nid";
+    $where = " WHERE form = '%s'";
+    $args = array($text);
+
+    if (!empty($options['language'])) {
+      #$sql .= " INNER JOIN {node} n ON f.nid = n.nid";
+      $where .= " AND e.language = '%s'";
+      $args[] = $options['language'];
+    }
+    if (!empty($options['pos'])) {
+      $where .= " AND e.pos = '%s'";
+      $args[] = $options['pos'];
+    }
+
+    $res = db_query($sql . $where, $args);
+    while ($obj = db_fetch_object($res)) {
+      $obj->exact = TRUE;
+      $results[] = $obj;
+    }
+
+    return $results;
+  }
+
+  // creates a special map of FAPI items for use by the themes
+  public static function mapItems(&$items) {
+    $map = array(
+      ':classes' => array(),
+      ':options' => array(),
+      ':forms'   => array(),
+    );
+
+    foreach (element_children($items) as $index) {
+      // From the formatter them function we get $items[$index]['#item'] but if we just toss
+      // $node->lingwo_fields in here, we get $items[$index] -- both modes are supported.
+      $item_info = $items[$index]['#item'] ? $items[$index]['#item'] : $items[$index];
+      $type = $item_info['type'];
+      $name = $item_info['name'];
+
+      // put into the basic flat map
+      $map[$name] = &$items[$index];
+      // and group by type
+      $type .= ($type == 'class') ? 'es' : 's';
+      $map[':'. $type][] = &$items[$index];
+    }
+
+    return $map;
+  }
+
+  /*
+   *
+   * Instance properties/methods.
+   * ===========================
+   *
+   */
 
   private $entry;
   private $node;
