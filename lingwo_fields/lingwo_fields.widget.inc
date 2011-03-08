@@ -266,6 +266,16 @@ function lingwo_fields_widget(&$form, &$form_state, $entry) {
 function theme_lingwo_fields_widget_form_wrapper($element) {
   $node = $element['#node'];
 
+  // Use our requirejs stubs so that requirejs itself isn't required
+  drupal_add_js(_lingwo_project_path() .'/js/requirejs-stubs.js');
+  // Add all the things we know are dependencies
+  // TODO: it would be sweet to do this automatically somehow (of course,
+  // the build does it automatically, I'm going to try and avoid that for now)
+  drupal_add_js(_lingwo_project_path() .'/js/util/declare.js');
+  drupal_add_js(_lingwo_project_path() .'/js/util/extendPrototype.js');
+  drupal_add_js(_lingwo_project_path() .'/js/Entry.js');
+  drupal_add_js(_lingwo_project_path() .'/js/Language.js');
+
   drupal_add_js(drupal_get_path('module', 'lingwo_fields') .'/lingwo_fields.js');
   drupal_add_css(drupal_get_path('module', 'lingwo_fields') .'/lingwo_fields.css');
 
