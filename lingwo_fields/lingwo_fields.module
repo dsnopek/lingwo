@@ -32,6 +32,13 @@ function lingwo_fields_menu() {
 }
 
 /**
+ * Implementation of hook_perm().
+ */
+function lingwo_fields_perm() {
+  return array('edit Lingwo fields JavaScript');
+}
+
+/**
  * Implementation of hook_lingwo_language_form().
  */
 function lingwo_fields_lingwo_language_form($language) {

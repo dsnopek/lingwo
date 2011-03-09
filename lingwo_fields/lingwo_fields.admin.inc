@@ -25,13 +25,20 @@ function _lingwo_fields_lingwo_language_form($language) {
     '#tree' => TRUE,
   );
 
-  // TODO: special permissions should be required for this!
-  $form['lingwo_fields_fields']['javascript'] = array(
-    '#title' => t('JavaScript'),
-    '#type' => 'textarea',
-    '#default_value' => $v['javascript'],
-    '#description' => t('JavaScript code for the language definition.  This should atleast define the language\'s alphabet!'),
-  );
+  if (user_access('edit Lingwo fields JavaScript')) {
+    $form['lingwo_fields_fields']['javascript'] = array(
+      '#title' => t('JavaScript'),
+      '#type' => 'textarea',
+      '#default_value' => $v['javascript'],
+      '#description' => t('JavaScript code for the language definition.  This should atleast define the language\'s alphabet!'),
+    );
+  }
+  else {
+    $form['lingwo_fields_fields']['javascript'] = array(
+      '#type' => 'value',
+      '#value' => $v['javascript'],
+    );
+  }
 
   // make a list of all the pos/field collections
   $pos = array();
@@ -53,7 +60,10 @@ function _lingwo_fields_lingwo_language_form($language) {
       '#title' => isset($pos_labels[$pos_name]) ? $pos_labels[$pos_name] : $pos_name,
     );
     foreach ($fields as $name => $field) {
-      $form['lingwo_fields_fields']['pos'][$pos_name][$name] = _lingwo_fields_admin_field_form($name, $field);
+      $element = _lingwo_fields_admin_field_form($name, $field);
+      $element['#collapsible'] = TRUE;
+      $element['#collapsed'] = TRUE;
+      $form['lingwo_fields_fields']['pos'][$pos_name][$name] = $element;
     }
   }
 
@@ -71,6 +81,7 @@ function _lingwo_fields_lingwo_language_form($language) {
     '#type' => 'textfield',
     '#title' => t('Name'),
     '#weight' => -10,
+    '#description' => t('The machine-readable name of this field. This will be used in the database and JavaScript. This name must contain only lowercase letters, numbers, and underscores. This name must be unique.'),
   );
   $add_field['submit'] = array(
     '#type' => 'submit',
@@ -91,6 +102,7 @@ function _lingwo_fields_admin_field_form($title, $field) {
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#default_value' => $field['label'],
+    '#description' => t('The human-readable name of this field. This will be displayed when editing this field on an entry. It is recommended that this name begin with a capital letter an contain only letters, numbers and spaces.'),
   );
   $element['type'] = array(
     '#type' => 'select',
@@ -101,6 +113,7 @@ function _lingwo_fields_admin_field_form($title, $field) {
       'class'  => 'Class',
     ),
     '#default_value' => $field['type'],
+    '#description' => t('The type of field.  <em>Form</em> is a string which represents another form of the headword (ex. plural like "cars" on the entry "car").  <em>Option</em> is value which has one of a fixed set of values (ex. gender of nouns, could be "Masculine" or "Feminine".  <em>Class</em> is a boolean value that states this word belongs to a certain class (ex. some adverbs are "Comparable" which some aren\'t).'),
   );
   $element['description'] = array(
     '#type' => 'textarea',
@@ -112,19 +125,32 @@ function _lingwo_fields_admin_field_form($title, $field) {
     '#type' => 'textarea',
     '#title' => t('Options'),
     '#default_value' => $field['options'],
+    '#description' => t('The list of options when the field <em>Type</em> is <em>Option</em>.  Put one option on each line.  Use the pipe symbol if you want the option to have an alternate display name, for example: <em>m|Masculine</em>.'),
   );
-  // TODO: should only be shown with a special permission
-  $element['automatic'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Automatic JavaScript function'),
-    '#default_value' => $field['automatic']
-  );
-  // TODO: should only be shown with a special permission
-  $element['show'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Show JavaScript function'),
-    '#default_value' => $field['show']
-  );
+  if (user_access('edit Lingwo fields JavaScript')) {
+    $element['automatic'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Automatic JavaScript function'),
+      '#default_value' => $field['automatic'],
+      '#description' => t('JavaScript function which get an <em>Entry</em> object as its only argument and should return the value automatically calculated for this field.  The return value depends on the type of the field: <em>Form</em> = <em>Word</em> object, <em>Option</em> = string, <em>Class</em> = boolean.'),
+    );
+    $element['show'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Show JavaScript function'),
+      '#default_value' => $field['show'],
+      '#description' => t('JavaScript function which gets an <em>Entry</em> object as its only argument and should return a boolean, which indicates if this field should be shown or not.  This allows some fields to only be shown, depending on the values of other fields.'),
+    );
+  }
+  else {
+    $element['automatic'] = array(
+      '#type' => 'value',
+      '#value' => $field['automatic'],
+    );
+    $element['show'] = array(
+      '#type' => 'value',
+      '#value' => $field['show'],
+    );
+  }
 
   return $element;
 }
@@ -151,13 +177,16 @@ function lingwo_fields_lingwo_language_form_validate($form, &$form_state) {
     $pos = $values['pos'];
 
     if (empty($name)) {
-      form_set_error('_lingwo_field_add_form][name', t('!name field is required.',
+      form_set_error('_lingwo_fields_add_form][name', t('!name field is required.',
         array('!name' => t('Name'))));
     }
+    elseif (!preg_match('!^[a-z0-9_]+$!', $name)) {
+      form_set_error('_lingwo_fields_add_form][name', t('The machine-readable name must contain only lowercase letters, numbers, and underscores.'));
+    }
     elseif (isset($form_state['values']['lingwo_fields_fields']['pos'][$pos][$name])) {
-      form_set_error('_lingwo_field_add_form][name', t('We already have a field named @name for @pos',
+      form_set_error('_lingwo_fields_add_form][name', t('We already have a field named @name for @pos',
         array('@name' => $name, '@pos' => $pos)));
-      form_set_error('_lingwo_field_add_form][pos');
+      form_set_error('_lingwo_fields_add_form][pos');
     }
   }
 }
