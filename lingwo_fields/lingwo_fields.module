@@ -13,6 +13,33 @@ require_once('lingwo_fields.widget.inc');
 
 
 /**
+ * Implementation of hook_menu().
+ */
+function lingwo_fields_menu() {
+  $items = array();
+
+  $items['admin/settings/lingwo/fields'] = array(
+    'title' => 'Fields',
+    'description' => 'Settings for Lingwo fields module.',
+    'access arguments' => array('administer site configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('lingwo_fields_admin_settings_form'),
+    'file' => 'lingwo_fields.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_lingwo_language_form().
+ */
+function lingwo_fields_lingwo_language_form($language) {
+  require_once('lingwo_fields.admin.inc');
+  return _lingwo_fields_lingwo_language_form($language);
+}
+
+/**
  * Implementation of hook_lingwo_entry_ext().
  */
 function lingwo_fields_lingwo_entry_properties() {

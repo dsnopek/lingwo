@@ -117,9 +117,9 @@ function lingwo_language_form(&$node, $form_state) {
     );
   }
 
-  foreach (module_implements('lingwo_language') as $module) {
-    $func = $module .'_lingwo_language';
-    $result = $func('form', $node->lingwo_language);
+  foreach (module_implements('lingwo_language_form') as $module) {
+    $func = $module .'_lingwo_language_form';
+    $result = $func(LingwoLanguage::fromNode($node));
     if (isset($result) && is_array($result)) {
       $element = array_merge($element, $result);
     }

@@ -13,8 +13,8 @@
 function lingwo_entry_admin_settings() {
   $settings = LingwoEntrySettings::get();
 
-  // we call our own hook_lingwo_language to build the pos_allowed_values form element
-  $form = _lingwo_language_form('lingwo_entry');
+  // we call our own hook_lingwo_language_form to build the pos_allowed_values form element
+  $form = _lingwo_language_form('lingwo_entry_lingwo_language_form');
 
   $form[$settings->name('node_title_munging')] = array(
     '#type' => 'checkboxes',

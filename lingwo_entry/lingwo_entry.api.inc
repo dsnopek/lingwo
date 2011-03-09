@@ -332,11 +332,19 @@ LingwoEntry::$settings = LingwoEntrySettings::get();
  *
  */
 
+class _LingwoLanguageNull {
+  public function hasValue($name) {
+    return FALSE;
+  }
+  public function getValue($name, $default=NULL) {
+    return $default;
+  }
+}
+
 // Gets the form from hook_lingwo_language for the given module
-function _lingwo_language_form($module) {
-  $value = array();
-  $func = $module .'_lingwo_language';
-  $form = $func('form', $value);
+function _lingwo_language_form($func=NULL) {
+  $lang = new _LingwoLanguageNull();
+  $form = $func($lang);
 
   // if we are using lingwo_language, tell the user these are just defaults
   if (module_exists('lingwo_language')) {
@@ -355,8 +363,11 @@ function _lingwo_language_form($module) {
 
 function _lingwo_language_value($settings, $name, $language) {
   $value = NULL;
-  if (module_exists('lingwo_language')) {
-    $value = LingwoLanguage::getValue($language, $settings->name($name));
+  if (module_exists('lingwo_language') && !empty($language) && !is_a($language, '_LingwoLanguageNull')) {
+    if (is_string($language)) {
+      $language = LingwoLanguage::fromCode($language);
+    }
+    $value = $language->getValue($settings->name($name));
   }
   if (is_null($value)) {
     $value = $settings->__get($name);

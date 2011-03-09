@@ -40,8 +40,38 @@ class LingwoLanguageSettings extends LingwoSettings {
 class LingwoLanguage {
   public static $settings;
 
-  public static function getValue($language, $name) {
-    $res = db_query("SELECT llr.value FROM {lingwo_language} ll, {node} n, {lingwo_language_revisions} llr WHERE llr.vid = n.vid AND n.nid = ll.nid AND ll.language = '%s' AND llr.name = '%s'", $language, $name);
+  private $node;
+
+  private function __construct($node) {
+    $this->node = $node;
+  }
+
+  public static function fromNode($node) {
+    if ($node->type == self::$settings->content_type) {
+      return new LingwoLanguage($node);
+    }
+  }
+
+  public static function fromNid($nid) {
+    return self::fromNode(node_load($nid));
+  }
+
+  public static function fromCode($code) {
+    $res = db_query("SELECT ll.nid FROM {lingwo_language} ll WHERE ll.language = '%s'", $code);
+    if ($obj = db_fetch_object($res)) {
+      return self::fromNid($obj->nid);
+    }
+  }
+
+  public function getValue($name, $default=NULL) {
+    if (isset($this->node->lingwo_language[$name])) {
+      return $this->node->lingwo_language[$name];
+    }
+    return $default;
+  }
+
+  public static function getValueQuick($code, $name) {
+    $res = db_query("SELECT llr.value FROM {lingwo_language} ll, {node} n, {lingwo_language_revisions} llr WHERE llr.vid = n.vid AND n.nid = ll.nid AND ll.language = '%s' AND llr.name = '%s'", $code, $name);
     if ($obj = db_fetch_object($res)) {
       return unserialize($obj->value);
     }
