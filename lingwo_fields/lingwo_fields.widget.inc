@@ -7,8 +7,6 @@
  */
 
 function _lingwo_fields_widget(&$form, &$form_state, $entry) {
-  //ahah_helper_register($form, $form_state);
-
   $node =& $entry->getNode();
   $pos = $node->pos;
   if (empty($pos) && !empty($form['pos']['#options'])) {
@@ -44,24 +42,20 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
     '#tree'  => TRUE,
   );
 
-  /*
   $ahah = array(
     //'event' => 'change',
-    'path' => ahah_helper_path(array('lingwo_fields', 'wrapper')),
+    'path' => _lingwo_ahah_path(array('lingwo_fields', 'wrapper')),
     //'path' => 'lingwo_fields/ahah/'. $field_name,
     'wrapper' => 'lingwo_fields-wrapper',
     //'effect' => 'fade',
     'effect' => 'none',
   );
-  */
 
   // If this node is new, then add the AHAH which will activate when language
   // or pos are changed.
   if (!$node->nid) {
-    /*
     $form['language']['#ahah'] = $ahah; // + array('event' => 'change');
     $form['pos']['#ahah'] = $ahah;
-    */
   }
 
   $element['wrapper'] = array(
@@ -179,7 +173,7 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
       $field_form['remove'] = array(
         '#type' => 'checkbox',
         '#title' => t('Remove'),
-        //'#ahah' => $ahah + array('event' => 'click'),
+        '#ahah' => $ahah + array('event' => 'click'),
       );
     }
     else {
@@ -238,7 +232,7 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
     '#type' => 'submit',
     '#value' => t('Add new form'),
     '#submit' => array('_lingwo_fields_submit_add_new_form'),
-    //'#ahah' => $ahah + array('event' => 'click')
+    '#ahah' => $ahah + array('event' => 'click')
   );
 
   // for reloading the current values
@@ -246,8 +240,9 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
     '#type' => 'submit',
     '#value' => t('Refresh'),
     '#submit' => array('_lingwo_fields_submit_change_pos'),
-    //'#ahah' => $ahah + array('event' => 'click'),
+    '#ahah' => $ahah + array('event' => 'click'),
     '#parents' => array('_lingwo_fields', 'refresh'),
+    '#attributes' => array('class' => 'no-js'),
   );
 
   $element['wrapper']['_lingwo_fields'] = $_lingwo_fields;

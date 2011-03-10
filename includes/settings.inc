@@ -1,4 +1,10 @@
 <?php
+// $Id$
+
+/**
+ * @file
+ * Helper code for managing module variables
+ */
 
 class LingwoSettings {
   protected $base_name = '';
