@@ -225,6 +225,22 @@ function lingwo_fields_lingwo_language_form($language) {
 }
 
 /**
+ * Implementation of hook_lingwo_language_form_validate().
+ */
+function lingwo_fields_lingwo_language_form_validate($form, &$form_state) {
+  require_once('lingwo_fields.admin.inc');
+  return _lingwo_fields_lingwo_language_form_validate($form, $form_state);
+}
+
+/**
+ * Implementation of hook_lingwo_language_form_submit().
+ */
+function lingwo_fields_lingwo_language_form_submit($form, &$form_state) {
+  require_once('lingwo_fields.admin.inc');
+  return _lingwo_fields_lingwo_language_form_submit($form, $form_state);
+}
+
+/**
  * Implementation of hook_lingwo_language_save().
  */
 function lingwo_fields_lingwo_language_save($language) {

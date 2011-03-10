@@ -19,10 +19,7 @@ function lingwo_fields_admin_settings_form() {
 function _lingwo_fields_lingwo_language_form($language) {
   $v = $language->getValue('lingwo_fields_fields', LingwoFields::$settings->fields);
 
-  $form = array(
-    '#submit' => array('lingwo_fields_lingwo_language_form_submit'),
-    '#validate' => array('lingwo_fields_lingwo_language_form_validate'),
-  );
+  $form = array();
   $form['lingwo_fields_fields'] = array(
     '#title' => t('Fields'),
     '#type' => 'fieldset',
@@ -67,14 +64,16 @@ function _lingwo_fields_lingwo_language_form($language) {
       $element = _lingwo_fields_admin_field_form($name, $field);
       $element['#collapsible'] = TRUE;
       $element['#collapsed'] = TRUE;
+      $element['remove'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Remove this field'),
+      );
       $form['lingwo_fields_fields']['pos'][$pos_name][$name] = $element;
     }
   }
 
   // form for adding a new field
   $add_field = _lingwo_fields_admin_field_form(t('Add field'), array());
-  $add_field['#parents'] = array('_lingwo_fields_add_form');
-  $add_field['#tree'] = TRUE;
   $add_field['pos'] = array(
     '#type' => 'select',
     '#title' => t('Part of Speech'),
@@ -159,30 +158,31 @@ function _lingwo_fields_admin_field_form($title, $field) {
   return $element;
 }
 
-function lingwo_fields_lingwo_language_form_validate($form, &$form_state) {
+function _lingwo_fields_lingwo_language_form_validate($form, &$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Add field')) {
-    $values = $form_state['values']['_lingwo_fields_add_form'];
+    $values = $form_state['values']['lingwo_fields_fields']['add_field'];
     $name = $values['name'];
     $pos = $values['pos'];
 
     if (empty($name)) {
-      form_set_error('_lingwo_fields_add_form][name', t('!name field is required.',
+      form_set_error('lingwo_fields_fields][add_field][name', t('!name field is required.',
         array('!name' => t('Name'))));
     }
     elseif (!preg_match('!^[a-z0-9_]+$!', $name)) {
-      form_set_error('_lingwo_fields_add_form][name', t('The machine-readable name must contain only lowercase letters, numbers, and underscores.'));
+      form_set_error('lingwo_field_fields][add_field][name', t('The machine-readable name must contain only lowercase letters, numbers, and underscores.'));
     }
     elseif (isset($form_state['values']['lingwo_fields_fields']['pos'][$pos][$name])) {
-      form_set_error('_lingwo_fields_add_form][name', t('We already have a field named @name for @pos',
+      form_set_error('lingwo_fields_fields][add_field][name', t('We already have a field named @name for @pos',
         array('@name' => $name, '@pos' => $pos)));
-      form_set_error('_lingwo_fields_add_form][pos');
+      form_set_error('lingwo_fields_fields][add_field][pos');
     }
   }
 }
 
-function lingwo_fields_lingwo_language_form_submit($form, &$form_state) {
+function _lingwo_fields_lingwo_language_form_submit($form, &$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Add field')) {
-    $values = $form_state['values']['_lingwo_fields_add_form'];
+    $values = $form_state['values']['lingwo_fields_fields']['add_field'];
+    unset($values['submit']);
 
     $pos =  $values['pos'];
     $name = $values['name'];
@@ -191,8 +191,19 @@ function lingwo_fields_lingwo_language_form_submit($form, &$form_state) {
 
     $form_state['values']['lingwo_fields_fields']['pos'][$pos][$name] = $values;
   }
+  unset($form_state['values']['lingwo_fields_fields']['add_field']);
 
-  unset($form_state['values']['_lingwo_fields_add_form']);
+  // process field removals
+  foreach (array_keys($form_state['values']['lingwo_fields_fields']['pos']) as $pos) {
+    foreach ($form_state['values']['lingwo_fields_fields']['pos'][$pos] as $name => $field) {
+      if ($field['remove']) {
+        unset($form_state['values']['lingwo_fields_fields']['pos'][$pos][$name]);
+      }
+      else {
+        unset($form_state['values']['lingwo_fields_fields']['pos'][$pos][$name]['remove']);
+      }
+    }
+  }
 }
 
 function _lingwo_fields_admin_generate_javascript($form, &$form_state) {

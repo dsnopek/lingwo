@@ -358,6 +358,9 @@ function _lingwo_language_form($func=NULL) {
     }
   }
 
+  $form['#submit'][] = $func .'_submit';
+  $form['#validate'][] = $func .'_validate';
+
   return $form;
 }
 

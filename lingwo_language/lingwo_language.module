@@ -117,17 +117,72 @@ function lingwo_language_form(&$node, $form_state) {
     );
   }
 
+  $language = LingwoLanguage::fromNode($node);
   foreach (module_implements('lingwo_language_form') as $module) {
     $func = $module .'_lingwo_language_form';
-    $result = $func(LingwoLanguage::fromNode($node));
+    $result = $func($language);
     if (isset($result) && is_array($result)) {
       $element = array_merge($element, $result);
     }
   }
 
   $form['lingwo_language'] = $element;
+  $form['#submit'][] = 'lingwo_language_form_submit';
+  $form['#validate'][] = 'lingwo_language_form_validate';
 
   return $form;
+}
+
+function lingwo_language_form_validate($form, &$form_state) {
+  $oldvalues = $form_state['values'];
+  $form_state['values'] = $form_state['values']['lingwo_language'];
+
+  foreach (module_implements('lingwo_language_form_validate') as $module) {
+    $func = $module .'_lingwo_language_form_validate';
+    $func($form, $form_state);
+  }
+
+  $oldvalues['lingwo_language'] = $form_state['values'];
+  $form_state['values'] = $oldvalues;
+
+  // if there are errors, we need to rewrite the $name portion
+  if ($form_errors = form_get_errors()) {
+    $messages = drupal_get_messages();
+
+    form_set_error(NULL, '', TRUE);
+    foreach ($form_errors as $name => $message) {
+      if (!empty($name)) {
+        $name = 'lingwo_language]['. $name;
+      }
+      form_set_error($name, $message);
+
+      // remove from our cache of the messages
+      $index = array_search($message, $messages['error']);
+      unset($messages['error'][$index]);
+    }
+
+    // reset any remaining messages
+    foreach ($messages as $type => $message) {
+      drupal_set_message($message, $type);
+    }
+  }
+}
+
+function lingwo_language_form_submit($form, &$form_state) {
+  $oldvalues = $form_state['values'];
+  $form_state['values'] = $form_state['values']['lingwo_language'];
+
+  foreach (module_implements('lingwo_language_form_submit') as $module) {
+    $func = $module .'_lingwo_language_form_submit';
+    $func($form, $form_state);
+  }
+
+  $oldvalues['lingwo_language'] = $form_state['values'];
+  $form_state['values'] = $oldvalues;
+
+  // rebuilds the node with the values on $form_state -- necessary when we aren't submitting, but
+  // just modifying the form.
+  _lingwo_form_to_node($form, $form_state);
 }
 
 /**
