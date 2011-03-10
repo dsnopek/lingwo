@@ -233,7 +233,7 @@
                 });
 
                 // hide the Refresh button, AHAH will handle the reloading
-                $('#edit--lingwo-fields-refresh', context).hide();
+                //$('#edit--lingwo-fields-refresh', context).hide();
 
                 $('#edit-title', context).bind('keyup', function (evt) {
                     entry.headword = evt.target.value;

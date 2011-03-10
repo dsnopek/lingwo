@@ -114,7 +114,7 @@ define('lingwo/Entry', ['lingwo/util/declare'],
                     value = this._handleFormValue(value);
                     for (i = 0; i < value.length; i++) {
                         if (!(value[i] instanceof this.language.Word)) {
-                            print (value[i]);
+                            //console.log(value[i]);
                             throw("Value returned from automatic function '"+name+"' is not a Word!");
                         }
                     }

@@ -16,12 +16,6 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
     $pos = $pos[0];
     $node->pos = $pos;
   }
-  $language = $node->language;
-  if (empty($language)) {
-    $language = array_keys($form['language']['#options']);
-    $language = $language[0];
-    $node->language = $language;
-  }
   if ($old_pair = $form_state['values']['_lingwo_fields']['old_pair']) {
     if ($old_pair != implode(':', array($language, $pos))) {
       // clear the fields, because we just changed the language or pos!
@@ -141,8 +135,10 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
         );
         break;;
       case 'option':
-        $options = $def['options'];
-        $options = array('' => '-none-') + $options;
+        $options = array('' => '-none-');
+        if (is_array($def['options']) && !empty($def['options'])) {
+          $options += $def['options'];
+        }
 
         $field_form['value'] += array(
           '#type' => 'select',
@@ -280,7 +276,7 @@ function theme_lingwo_fields_widget_form_wrapper($element) {
   $languages = language_list('enabled');
   $languages = $languages[1];
   foreach ($languages as $language) {
-  	drupal_add_js(file_directory_path() .'/lingwo/languages/'. $language->language .'.js');
+    drupal_add_js(file_directory_path() .'/lingwo/languages/'. $language->language .'.js');
   }
 
   drupal_add_js(array('lingwo_fields' => array('language' => $node->language)), 'setting');

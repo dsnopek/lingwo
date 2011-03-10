@@ -155,6 +155,7 @@ class LingwoFields implements IteratorAggregate {
       }
       $out .= "\n};\n";
     }
+    $out .= "return lang;\n";
     $out .= "});\n\n";
 
     $output_path = file_directory_path() .'/lingwo/languages';
