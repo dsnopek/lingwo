@@ -190,10 +190,13 @@ function lingwo_language_update($node) {
   }
 
   // store everything except language as part of the revision
-  unset($node->lingwo_language['language']);
-  foreach ($node->lingwo_language as $name => $value) {
+  $values = $node->lingwo_language;
+  unset($values['language']);
+  foreach ($values as $name => $value) {
     db_query("REPLACE INTO {lingwo_language_revisions} (vid, nid, name, value) VALUES (%d, %d, '%s', '%s')", $node->vid, $node->nid, $name, serialize($value));
   }
+
+  module_invoke_all('lingwo_language_save', LingwoLanguage::fromNode($node));
 }
 
 /**

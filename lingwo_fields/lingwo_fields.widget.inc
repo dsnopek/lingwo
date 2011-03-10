@@ -11,7 +11,7 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
 
   $node =& $entry->getNode();
   $pos = $node->pos;
-  if (empty($pos)) {
+  if (empty($pos) && !empty($form['pos']['#options'])) {
     $pos = array_keys($form['pos']['#options']);
     $pos = $pos[0];
     $node->pos = $pos;
@@ -136,8 +136,8 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
         break;;
       case 'option':
         $options = array('' => '-none-');
-        if (is_array($def['options']) && !empty($def['options'])) {
-          $options += $def['options'];
+        if (!empty($def['options'])) {
+          $options = $options + _lingwo_name_value_list($def['options']);
         }
 
         $field_form['value'] += array(

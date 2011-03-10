@@ -104,7 +104,7 @@ class LingwoFields implements IteratorAggregate {
   // TODO: we need to do more about security here!  All the identifiers need to be verified as 
   // JavaScript safe here or even better, before we get to this point.
   public static function generateJavascript($language_name, $language) {
-    $data = $language->getValue('fields', self::$settings->fields);
+    $data = $language->getValue(self::$settings->name('fields'), self::$settings->fields);
 
     $out .= "define('lingwo/languages/$language_name', ['lingwo/Language'], function (Language) {\n";
     $out .= "var lang = Language.defineLanguage('$language_name');\n";
@@ -127,20 +127,7 @@ class LingwoFields implements IteratorAggregate {
 
         // write options if necessary
         if ($field['type'] == 'option' and !empty($field['options'])) {
-          $list = explode("\n", $field['options']);
-          $list = array_map('trim', $list);
-          $list = array_filter($list, 'strlen');
-          $options = array();
-          foreach ($list as $opt) {
-            if (strpos($opt, '|') !== FALSE) {
-              list ($key, $value) = explode('|', $opt);
-            }
-            else {
-              $key = $value = $opt;
-            }
-            $options[$key] = $value;
-          }
-          $out .= ",\noptions: ". drupal_to_js($options);
+          $out .= ",\noptions: ". drupal_to_js(_lingwo_name_value_list($field['options']));
         }
 
         // write out javascript functions

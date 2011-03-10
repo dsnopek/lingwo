@@ -363,10 +363,12 @@ function _lingwo_language_form($func=NULL) {
 
 function _lingwo_language_value($settings, $name, $language) {
   $value = NULL;
-  if (module_exists('lingwo_language') && !empty($language) && !is_a($language, '_LingwoLanguageNull')) {
+  if (module_exists('lingwo_language') && !empty($language)) {
     if (is_string($language)) {
       $language = LingwoLanguage::fromCode($language);
     }
+  }
+  if (!empty($language) && !is_a($language, '_LingwoLanguageNull')) {
     $value = $language->getValue($settings->name($name));
   }
   if (is_null($value)) {
@@ -375,24 +377,31 @@ function _lingwo_language_value($settings, $name, $language) {
   return $value;
 }
 
-function _lingwo_allowed_values($settings, $name, $language, $translate=FALSE, $option_name=NULL) {
-  $list = explode("\n", _lingwo_language_value($settings, $name .'_allowed_values', $language));
+function _lingwo_name_value_list($text) {
+  $list = explode("\n", $text);
   $list = array_map('trim', $list);
   $list = array_filter($list, 'strlen');
-
-  // Only translate if we have i18nstrings
-  $translate = $translate && module_exists('i18nstrings');
-
   $options = array();
   foreach ($list as $opt) {
     if (strpos($opt, '|') !== FALSE) {
       list ($key, $value) = explode('|', $opt);
     }
     else {
-      $key = $opt;
-      $value = $opt;
+      $key = $value = $opt;
     }
+    $options[$key] = $value;
+  }
+  return $options;
+}
 
+function _lingwo_allowed_values($settings, $name, $language, $translate=FALSE, $option_name=NULL) {
+  $list = _lingwo_name_value_list(_lingwo_language_value($settings, $name .'_allowed_values', $language));
+
+  // Only translate if we have i18nstrings
+  $translate = $translate && module_exists('i18nstrings');
+
+  $options = array();
+  foreach ($list as $key => $value) {
     // if we are only looking for one key, skip all the rest
     if (!is_null($option_name) && $option_name != $key) {
       continue;

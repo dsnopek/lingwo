@@ -63,6 +63,10 @@ class LingwoLanguage {
     }
   }
 
+  public function getNode() {
+    return $this->node;
+  }
+
   public function getValue($name, $default=NULL) {
     if (isset($this->node->lingwo_language[$name])) {
       return $this->node->lingwo_language[$name];

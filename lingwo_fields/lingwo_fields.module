@@ -38,14 +38,6 @@ function lingwo_fields_perm() {
 }
 
 /**
- * Implementation of hook_lingwo_language_form().
- */
-function lingwo_fields_lingwo_language_form($language) {
-  require_once('lingwo_fields.admin.inc');
-  return _lingwo_fields_lingwo_language_form($language);
-}
-
-/**
  * Implementation of hook_lingwo_entry_ext().
  */
 function lingwo_fields_lingwo_entry_properties() {
@@ -222,5 +214,21 @@ function lingwo_fields_nodeapi(&$node, $op, $a3=NULL, $a4=NULL) {
       db_query("DELETE FROM {lingwo_fields_forms}     WHERE nid = %d", $node->nid);
       break;
   }
+}
+
+/**
+ * Implementation of hook_lingwo_language_form().
+ */
+function lingwo_fields_lingwo_language_form($language) {
+  require_once('lingwo_fields.admin.inc');
+  return _lingwo_fields_lingwo_language_form($language);
+}
+
+/**
+ * Implementation of hook_lingwo_language_save().
+ */
+function lingwo_fields_lingwo_language_save($language) {
+  $code = $language->getValue('language', $language->getNode()->nid);
+  LingwoFields::generateJavascript($code, $language);
 }
 
