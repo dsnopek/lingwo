@@ -9,7 +9,11 @@
 function lingwo_fields_admin_settings_form() {
   $settings =& LingwoFields::$settings;
   $form = _lingwo_language_form('_lingwo_fields_lingwo_language_form');
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+  if (!module_exists('lingwo_language')) {
+    $form['#submit'][] = '_lingwo_fields_admin_generate_javascript';
+  }
+  return $form;
 }
 
 function _lingwo_fields_lingwo_language_form($language) {
@@ -155,21 +159,6 @@ function _lingwo_fields_admin_field_form($title, $field) {
   return $element;
 }
 
-function lingwo_fields_lingwo_language_form_submit($form, &$form_state) {
-  if ($form_state['clicked_button']['#value'] == t('Add field')) {
-    $values = $form_state['values']['_lingwo_fields_add_form'];
-
-    $pos =  $values['pos'];
-    $name = $values['name'];
-    unset($values['pos']);
-    unset($values['name']);
-
-    $form_state['values']['lingwo_fields_fields']['pos'][$pos][$name] = $values;
-  }
-
-  unset($form_state['values']['_lingwo_fields_add_form']);
-}
-
 function lingwo_fields_lingwo_language_form_validate($form, &$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Add field')) {
     $values = $form_state['values']['_lingwo_fields_add_form'];
@@ -189,5 +178,24 @@ function lingwo_fields_lingwo_language_form_validate($form, &$form_state) {
       form_set_error('_lingwo_fields_add_form][pos');
     }
   }
+}
+
+function lingwo_fields_lingwo_language_form_submit($form, &$form_state) {
+  if ($form_state['clicked_button']['#value'] == t('Add field')) {
+    $values = $form_state['values']['_lingwo_fields_add_form'];
+
+    $pos =  $values['pos'];
+    $name = $values['name'];
+    unset($values['pos']);
+    unset($values['name']);
+
+    $form_state['values']['lingwo_fields_fields']['pos'][$pos][$name] = $values;
+  }
+
+  unset($form_state['values']['_lingwo_fields_add_form']);
+}
+
+function _lingwo_fields_admin_generate_javascript($form, &$form_state) {
+  LingwoFields::generateJavascript(language_default()->language, new _LingwoLanguageNull());
 }
 

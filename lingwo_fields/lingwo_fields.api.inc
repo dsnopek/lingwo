@@ -101,6 +101,70 @@ class LingwoFields implements IteratorAggregate {
     return $map;
   }
 
+  // TODO: we need to do more about security here!  All the identifiers need to be verified as 
+  // JavaScript safe here or even better, before we get to this point.
+  public static function generateJavascript($language_name, $language) {
+    $data = $language->getValue('fields', self::$settings->fields);
+
+    $out .= "define('lingwo/languages/$language_name', ['lingwo/Language'], function (Language) {\n";
+    $out .= "var lang = Language.defineLanguage('$language_name');\n";
+    $out .= $data['javascript'];
+    
+    foreach (array_keys($data['pos']) as $pos) {
+      $out .= "lang.fields.$pos = {\n";
+      $first = TRUE;
+      foreach ($data['pos'][$pos] as $name => $field) {
+        if ($first) {
+          $first = FALSE;
+        }
+        else {
+          $out .= ",\n";
+        }
+
+        $out .= "'$name': {\n";
+        $out .= "type: '". $field['type'] ."'";
+        $out .= ",\nlabel: '". $field['label'] ."'";
+
+        // write options if necessary
+        if ($field['type'] == 'option' and !empty($field['options'])) {
+          $list = explode("\n", $field['options']);
+          $list = array_map('trim', $list);
+          $list = array_filter($list, 'strlen');
+          $options = array();
+          foreach ($list as $opt) {
+            if (strpos($opt, '|') !== FALSE) {
+              list ($key, $value) = explode('|', $opt);
+            }
+            else {
+              $key = $value = $opt;
+            }
+            $options[$key] = $value;
+          }
+          $out .= ",\noptions: ". drupal_to_js($options);
+        }
+
+        // write out javascript functions
+        foreach (array('automatic', 'show') as $field_name) {
+          if (!empty($field[$field_name])) {
+            $out .= ",\n$field_name: function (entry) {\n";
+            $out .= $field[$field_name];
+            $out .= "\n}";
+          }
+        }
+        $out .= "\n}";
+      }
+      $out .= "\n};\n";
+    }
+    $out .= "});\n\n";
+
+    $output_path = file_directory_path() .'/lingwo/languages';
+    if (!is_dir($output_path)) {
+      mkdir($output_path, 0775, TRUE);
+    }
+    $output_file = $output_path .'/'. $language_name .'.js';
+    file_save_data($out, $output_file, FILE_EXISTS_REPLACE);
+  }
+
   /*
    *
    * Instance properties/methods.
@@ -123,8 +187,16 @@ class LingwoFields implements IteratorAggregate {
   public function getFields() {
     $this->clean();
     $items = $this->node->lingwo_fields;
+
+    // get the definitions for this language/pos pair
+    $field_definitions = _lingwo_language_value(self::$settings, 'fields', $this->node->language);
+    $field_definitions = $field_definitions['pos'][$this->node->pos];
+    if (empty($field_definitions)) {
+      return array();
+    }
+
     $fields = array();
-    foreach (lingwo_language_fields($this->node->language, $this->node->pos) as $name => $field) {
+    foreach ($field_definitions as $name => $field) {
       if (isset($items[$name])) {
         $item = $items[$name];
         unset($items[$name]);

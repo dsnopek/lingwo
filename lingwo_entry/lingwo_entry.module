@@ -304,7 +304,7 @@ function lingwo_entry_block($op = 'list', $delta = 0, $edit = array()) {
  */
 function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == (LingwoEntry::$settings->content_type .'_node_form')) {
-    $node = $form['#node'];
+    $node =& $form['#node'];
 
     // allow some fields to be set automagically for new nodes
     if (empty($node->nid)) {
@@ -319,7 +319,8 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
       }
     }
 
-    // modify the language element so that the node *must* have a language
+    // Modify the language element so that the node *must* have a language.
+    // Also, make sure that $node->language is always set to this same value.
     if (isset($form['language'])) {
       if ($form['language']['#type'] == 'select') {
         // remove language neutral and set language as required
@@ -332,8 +333,11 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
           $node->language = $form['language']['#default_value'] = $options[0];
         }
       }
-      else if ($form['language']['#type'] == 'value' && empty($form['language']['#value'])) {
-        $node->language = $form['language']['#value'] = language_default('language');
+      else if ($form['language']['#type'] == 'value') {
+        if (empty($form['language']['#value'])) {
+          $form['language']['#value'] = language_default('language');
+        }
+        $node->language = $form['language']['#value'];
       }
     }
     else {

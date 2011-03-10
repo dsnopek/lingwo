@@ -4,7 +4,7 @@
  */
 
 // declare
-define(['lingwo/util/extendPrototype'],
+define('lingwo/util/declare', ['lingwo/util/extendPrototype'],
     function (extendPrototype) {
         return function (props) {
             var cons = props['_constructor'];

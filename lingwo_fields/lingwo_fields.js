@@ -216,7 +216,7 @@
 
     Drupal.behaviors.lingwo_fields = function (context) {
         // get the language/pos from the form
-        var lang = $('#edit-language :selected').val();
+        var lang = $('#edit-language :selected').val() || Drupal.settings.lingwo_fields.language;
         var pos  = $('#edit-pos :selected').val();
 
         require(

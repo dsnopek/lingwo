@@ -11,7 +11,6 @@ require_once('lingwo_fields.api.inc');
 // the code for generating the bits on the node form (here for organizational purposes)
 require_once('lingwo_fields.widget.inc');
 
-
 /**
  * Implementation of hook_menu().
  */
@@ -88,7 +87,7 @@ function lingwo_fields_form_alter(&$form, &$form_state, $form_id) {
     $entry = LingwoEntry::fromNode($node);
     if (!$entry->isTranslation()) {
       // only applies to entries that are not translations
-      $form['lingwo_fields'] = lingwo_fields_widget($form, $form_state, $entry);
+      $form['lingwo_fields'] = _lingwo_fields_widget($form, $form_state, $entry);
     }
   }
 }

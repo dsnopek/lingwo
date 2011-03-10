@@ -6,7 +6,7 @@
  * The "widget" (form chucklet that goes on the node form)
  */
 
-function lingwo_fields_widget(&$form, &$form_state, $entry) {
+function _lingwo_fields_widget(&$form, &$form_state, $entry) {
   //ahah_helper_register($form, $form_state);
 
   $node =& $entry->getNode();
@@ -266,15 +266,24 @@ function lingwo_fields_widget(&$form, &$form_state, $entry) {
 function theme_lingwo_fields_widget_form_wrapper($element) {
   $node = $element['#node'];
 
+  $js_path = dirname(drupal_get_path('module', 'lingwo_fields')) ."/js/";
+
   // Use our requirejs stubs so that requirejs itself isn't required
-  drupal_add_js(_lingwo_project_path() .'/js/requirejs-stubs.js');
+  drupal_add_js($js_path .'require-stubs.js');
   // Add all the things we know are dependencies
   // TODO: it would be sweet to do this automatically somehow (of course,
   // the build does it automatically, I'm going to try and avoid that for now)
-  drupal_add_js(_lingwo_project_path() .'/js/util/declare.js');
-  drupal_add_js(_lingwo_project_path() .'/js/util/extendPrototype.js');
-  drupal_add_js(_lingwo_project_path() .'/js/Entry.js');
-  drupal_add_js(_lingwo_project_path() .'/js/Language.js');
+  foreach (array('util/declare.js', 'util/extendPrototype.js', 'Entry.js', 'Language.js') as $js) {
+    drupal_add_js($js_path . $js);
+  }
+
+  $languages = language_list('enabled');
+  $languages = $languages[1];
+  foreach ($languages as $language) {
+  	drupal_add_js(file_directory_path() .'/lingwo/languages/'. $language->language .'.js');
+  }
+
+  drupal_add_js(array('lingwo_fields' => array('language' => $node->language)), 'setting');
 
   drupal_add_js(drupal_get_path('module', 'lingwo_fields') .'/lingwo_fields.js');
   drupal_add_css(drupal_get_path('module', 'lingwo_fields') .'/lingwo_fields.css');

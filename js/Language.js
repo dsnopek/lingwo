@@ -4,7 +4,7 @@
  */
 
 // Language
-define(['lingwo/util/extendPrototype'],
+define('lingwo/Language', ['lingwo/util/extendPrototype'],
     function (extendPrototype) {
         // we string everything off of the Language constructor function.
         var Language = function () {

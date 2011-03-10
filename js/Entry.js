@@ -4,7 +4,7 @@
  */
 
 // Entry
-define(['lingwo/util/declare'],
+define('lingwo/Entry', ['lingwo/util/declare'],
     function (declare) {
         var Entry = declare({
             _constructor: function (args) {
