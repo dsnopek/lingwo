@@ -103,7 +103,7 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
     );
 
     $field_form['value'] = array(
-      '#title' => isset($def['label']) ? $def['label'] : $name,
+      '#title' => !empty($def['label']) ? $def['label'] : $name,
       '#default_value' => $field['value'],
       // TODO: we need to enforce required with select boxes
       '#required' => $def['required'] ? TRUE : FALSE,

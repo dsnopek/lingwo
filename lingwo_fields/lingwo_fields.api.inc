@@ -111,7 +111,7 @@ class LingwoFields implements IteratorAggregate {
     $out .= $data['javascript'];
     
     foreach (array_keys($data['pos']) as $pos) {
-      $out .= "lang.fields.$pos = {\n";
+      $out .= "lang.fields['$pos'] = {\n";
       $first = TRUE;
       foreach ($data['pos'][$pos] as $name => $field) {
         if ($first) {
