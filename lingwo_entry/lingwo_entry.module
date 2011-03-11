@@ -6,10 +6,8 @@
  * Implements hooks for Lingwo entry
  */
 
-// get our API functions
+// get our API functions (both internal and external)
 require_once('lingwo_entry.api.inc');
-// include internal API functions
-require_once(dirname(__FILE__) .'/../includes/ahah.inc');
 
 /**
  * Implementation of hook_init().
