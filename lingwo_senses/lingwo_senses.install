@@ -53,7 +53,7 @@ function _lingwo_senses_install_default_senses() {
     if (module_exists('translation')) {
       $trans = translation_node_get_translations($obj->nid);
       if (!is_null($trans)) {
-        foreach(array_values($trans) as $tnode) {
+        foreach (array_values($trans) as $tnode) {
           $nids[] = $tnode->nid;
         }
       }
@@ -87,8 +87,8 @@ function lingwo_senses_install() {
 function lingwo_senses_uninstall() {
   drupal_uninstall_schema('lingwo_senses');
 
-  foreach(LingwoSenses::$settings->getNames() as $name) {
-  	variable_del($name);
+  foreach (LingwoSenses::$settings->getNames() as $name) {
+    variable_del($name);
   }
 }
 

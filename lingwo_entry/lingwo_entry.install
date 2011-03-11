@@ -152,7 +152,7 @@ function lingwo_entry_uninstall() {
   $entry_type = LingwoEntry::$settings->content_type;
 
   // remove all of our variables
-  foreach(LingwoEntry::$settings->getNames() as $name) {
+  foreach (LingwoEntry::$settings->getNames() as $name) {
     variable_del($name);
   }
 

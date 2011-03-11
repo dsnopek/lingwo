@@ -170,7 +170,7 @@ function theme_lingwo_senses_translation($node, $items=NULL) {
     $output .= join(', ', $values);
 
     if (!empty($orig_sense['data']['example']) && LingwoSenses::$settings->example != 'none') {
-	  $output .= '<blockquote class="lingwo-sense-example">';
+      $output .= '<blockquote class="lingwo-sense-example">';
       if (LingwoSenses::$settings->example == 'single' && empty($sense['example_translation'])) {
         $output .= check_plain($orig_sense['data']['example']);
       }
@@ -182,7 +182,7 @@ function theme_lingwo_senses_translation($node, $items=NULL) {
         }
         $output .= '</table>';
       }
-	  $output .= '</blockquote>';
+      $output .= '</blockquote>';
     }
     $output .= '</li>';
   };

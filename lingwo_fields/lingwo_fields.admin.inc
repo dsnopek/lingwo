@@ -48,7 +48,7 @@ function _lingwo_fields_lingwo_language_form($language) {
   foreach ($pos_options as $key => $value) {
     if (isset($v['pos'][$key])) {
       $pos[$key] = $v['pos'][$key];
-      unset ($v['pos'][$key]);
+      unset($v['pos'][$key]);
     }
     $pos_labels[$key] = $value;
   }

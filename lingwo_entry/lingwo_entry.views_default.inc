@@ -1,4 +1,10 @@
 <?php
+// $Id$
+
+/**
+ * @file
+ * Default views defined for Lingwo dictionary.
+ */
 
 /**
  * Implementation of hook_views_default_views().

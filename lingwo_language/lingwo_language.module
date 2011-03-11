@@ -13,7 +13,7 @@ require_once('lingwo_language.api.inc');
  * Implementation of hook_perm().
  */
 function lingwo_language_perm() {
-  return array (
+  return array(
     'create Lingwo language definition',
     'delete own Lingwo language definition',
     'delete any normal Lingwo language definition',
@@ -239,7 +239,7 @@ function lingwo_language_update($node) {
     // we will set this value to NULL)
     db_query("REPLACE INTO {lingwo_language} (nid, language) VALUES (%d, NULL)", $node->nid);
   }
-  else if ($language_perms) {
+  elseif ($language_perms) {
     // update to the appropriate value (only do if we have permission)
     db_query("REPLACE INTO {lingwo_language} (nid, language) VALUES (%d, '%s')", $node->nid, $node->lingwo_language['language']);
   }

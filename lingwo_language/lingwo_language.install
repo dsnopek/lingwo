@@ -46,7 +46,7 @@ function lingwo_language_schema() {
       'nid' => array('nid'),
       'vid' => array('vid'),
     ),
-    'primary key' => array('vid','name'),
+    'primary key' => array('vid', 'name'),
   );
 
   $schema['lingwo_language'] = array(
@@ -96,7 +96,7 @@ function lingwo_language_install() {
 function lingwo_language_uninstall() {
   drupal_uninstall_schema('lingwo_language');
 
-  foreach(LingwoLanguage::$settings->getNames() as $name) {
+  foreach (LingwoLanguage::$settings->getNames() as $name) {
     variable_del($name);
   }
 }
