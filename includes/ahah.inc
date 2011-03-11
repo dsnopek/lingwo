@@ -92,7 +92,7 @@ function _lingwo_ahah_get_form_item($form, $form_item) {
   }
 
   $parents = explode('][', $form_item);
-  foreach($parents as $parent) {
+  foreach ($parents as $parent) {
     if (isset($form[$parent])) {
       $form = $form[$parent];
     }

@@ -22,7 +22,7 @@ function _lingwo_language_form($func=NULL) {
 
   // if we are using lingwo_language, tell the user these are just defaults
   if (module_exists('lingwo_language')) {
-    foreach(array_keys($form) as $key) {
+    foreach (array_keys($form) as $key) {
       if (isset($form[$key]['#type']) && $form[$key]['#type'] != 'markup') {
         if (!empty($form[$key]['#description'])) {
           $form[$key]['#description'] .= ' ';
