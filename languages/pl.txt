@@ -6,7 +6,7 @@ array(
     'uid' => '1',
     'status' => '1',
     'created' => '1299876784',
-    'changed' => '1299876784',
+    'changed' => '1299877235',
     'comment' => '2',
     'promote' => '1',
     'moderate' => '0',
@@ -19,7 +19,7 @@ array(
     'body' => '',
     'teaser' => '',
     'log' => '',
-    'revision_timestamp' => '1299876784',
+    'revision_timestamp' => '1299877235',
     'format' => '0',
     'name' => 'admin',
     'picture' => '',
@@ -442,7 +442,9 @@ if (ending = stem.endingOrFalse("ż")) {
               'label' => 'Gender',
               'type' => 'option',
               'description' => '',
-              'options' => '',
+              'options' => 'masculine|Masculine
+feminine|Feminine
+neuter|Neuter',
               'automatic' => 'var word = entry.getWord();
 return word.ending("o", "e", "ę", "um").result("neuter") || word.ending(Language.cls("vowel")).result("feminine") || "masculine";
 ',
@@ -737,7 +739,9 @@ return stemChange(stem).append("e");
             'conjugation' => array(
               'label' => 'Conjugation',
               'type' => 'option',
-              'description' => '',
+              'description' => 'first|First
+second|Second
+third|Third',
               'options' => '',
               'automatic' => 'var word = entry.getWord();
 return word.ending("ować", "iwać", "awać", "ywać").result("first") || word.ending("ać", "ieć").result("third") || word.ending("ić", "yć", "eć").result("second") || "";

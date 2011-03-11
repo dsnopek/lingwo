@@ -6,7 +6,7 @@ array(
     'uid' => '1',
     'status' => '1',
     'created' => '1299875238',
-    'changed' => '1299875428',
+    'changed' => '1299877144',
     'comment' => '2',
     'promote' => '1',
     'moderate' => '0',
@@ -19,7 +19,7 @@ array(
     'body' => '',
     'teaser' => '',
     'log' => '',
-    'revision_timestamp' => '1299875428',
+    'revision_timestamp' => '1299877144',
     'format' => '0',
     'name' => 'admin',
     'picture' => '',
@@ -294,7 +294,9 @@ return word.ending("e").append("st") || word.ending("y").replace("iest") || word
               'label' => 'Plural Type',
               'type' => 'option',
               'description' => '',
-              'options' => '',
+              'options' => 'both|Has singular and plural
+singular|Singular only
+plural|Plural only',
               'automatic' => 'return "both";
 ',
               'show' => '',
