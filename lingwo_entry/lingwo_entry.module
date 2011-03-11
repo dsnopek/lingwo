@@ -363,22 +363,14 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
 
     // setup the pos select
     $form['pos'] = array(
+      '#prefix' => '<div id="lingwo_entry-pos-wrapper">',
+      '#suffix' => '</div>',
       '#type' => 'select',
       '#title' => t('Part of Speech'),
       '#options' => LingwoEntry::getPosOptions($node->language, TRUE),
       '#default_value' => $node->pos,
       '#required' => TRUE,
     );
-
-    // add a reload button if different languages can have different sets of POS values
-    if (module_exists('lingwo_language')) {
-      $form['pos_reload'] = array(
-        '#type' => 'submit',
-        '#value' => t('Refresh Part of Speech list'),
-        '#submit' => array('_lingwo_form_to_node'),
-        '#parents' => array('_lingwo_entry','reload_pos'),
-      );
-    }
 
     // when editting a translation or existing node...
     if (isset($node->nid) || _lingwo_is_translation($node)) {
@@ -397,6 +389,27 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
       // make the pos uneditable
       $form['pos']['#disabled'] = TRUE;
     }
+    elseif (module_exists('lingwo_language')) {
+      // add a reload button if different languages can have different sets of POS values
+      $form['pos_reload'] = array(
+        '#type' => 'submit',
+        '#value' => t('Refresh Part of Speech list'),
+        '#submit' => array('_lingwo_form_to_node'),
+        '#parents' => array('_lingwo_entry','reload_pos'),
+        '#ahah' => array(
+          'path' => _lingwo_ahah_path(array('pos')),
+          'wrapper' => 'lingwo_entry-pos-wrapper',
+          'effect' => 'none',
+          'progress' => array(
+            'type' => 'none',
+          ),
+        ),
+        '#ahah_disable_validation' => TRUE,
+        '#attributes' => array('class' => 'no-js'),
+      );
+
+      drupal_add_js(drupal_get_path('module', 'lingwo_entry') .'/lingwo_entry.js');
+    }
   }
 }
 
@@ -409,9 +422,16 @@ function lingwo_entry_content_extra_fields($type_name) {
   if (LingwoEntry::$settings->content_type == $type_name) {
     $extra['pos'] = array(
       'label' => t('Part of Speech'),
-      'description' => t('Lingwo Dictionary "Part of Speech" field.'),
+      'description' => t('Lingwo dictionary "Part of Speech" field.'),
       'weight' => 0,
     );
+    if (module_exists('lingwo_language')) {
+      $extra['pos_reload'] = array(
+        'label' => t('Refresh Part of Speech list'),
+        'description' => t('Refresh button for Lingwo dictionary "Part of Speech" field (only shown when JavaScript is disabled).'),
+        'weight' => 0,
+      );
+    }
   }
 
   return $extra;
@@ -428,14 +448,6 @@ function lingwo_entry_nodeapi(&$node, $op, $a3, $a4) {
     case 'prepare translation':
       $node->pos = $node->translation_source->pos;
       break;
-    /*
-    case 'presave':
-      // A hackity hack that makes view integration always work!
-      if (empty($node->tnid)) {
-        $node->tnid = $node->nid;
-      }
-      break;
-    */
   }
 }
 

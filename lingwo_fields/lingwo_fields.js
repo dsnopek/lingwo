@@ -219,6 +219,15 @@
         var lang = $('#edit-language :selected').val() || Drupal.settings.lingwo_fields.language;
         var pos  = $('#edit-pos :selected').val();
 
+        // bind to language and pos to trigger AHAH
+        $('#edit-language, #edit-pos', context).change(function () {
+            var id = 'edit--lingwo-fields-refresh',
+                settings = Drupal.settings.ahah[id],
+                event_name = settings['event'],
+                selector = settings['selector'];
+            $(selector).trigger(event_name);
+        });
+
         require(
             ['lingwo/languages/'+lang,
              'lingwo/Entry'],

@@ -8,8 +8,10 @@
 
 function _lingwo_fields_widget(&$form, &$form_state, $entry) {
   $node =& $entry->getNode();
+  $language = $node->language;
+  // make sure we have a valid POS!
   $pos = $node->pos;
-  if (empty($pos) && !empty($form['pos']['#options'])) {
+  if (!empty($form['pos']['#options']) && (empty($pos) || !isset($form['pos']['#options'][$pos]))) {
     $pos = array_keys($form['pos']['#options']);
     $pos = $pos[0];
     $node->pos = $pos;
@@ -43,20 +45,13 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
   );
 
   $ahah = array(
-    //'event' => 'change',
     'path' => _lingwo_ahah_path(array('lingwo_fields', 'wrapper')),
-    //'path' => 'lingwo_fields/ahah/'. $field_name,
     'wrapper' => 'lingwo_fields-wrapper',
-    //'effect' => 'fade',
     'effect' => 'none',
+    'progress' => array(
+      'type' => 'none',
+    ),
   );
-
-  // If this node is new, then add the AHAH which will activate when language
-  // or pos are changed.
-  if (!$node->nid) {
-    $form['language']['#ahah'] = $ahah; // + array('event' => 'change');
-    $form['pos']['#ahah'] = $ahah;
-  }
 
   $element['wrapper'] = array(
     '#prefix' => '<div id="lingwo_fields-wrapper">',
@@ -64,8 +59,8 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
   );
   $element['wrapper']['fields'] = array(
     '#theme' => array(
-      'lingwo_fields_widget_form_'. $node->language .'_'. $pos,
-      'lingwo_fields_widget_form_'. $node->language, 
+      'lingwo_fields_widget_form_'. $language .'_'. $pos,
+      'lingwo_fields_widget_form_'. $language, 
       'lingwo_fields_widget_form'
     ),
     '#parents' => array('lingwo_fields'),
@@ -236,14 +231,17 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
   );
 
   // for reloading the current values
-  $_lingwo_fields['refresh'] = array(
-    '#type' => 'submit',
-    '#value' => t('Refresh'),
-    '#submit' => array('_lingwo_fields_submit_change_pos'),
-    '#ahah' => $ahah + array('event' => 'click'),
-    '#parents' => array('_lingwo_fields', 'refresh'),
-    '#attributes' => array('class' => 'no-js'),
-  );
+  if (!$node->nid) {
+    $_lingwo_fields['refresh'] = array(
+      '#type' => 'submit',
+      '#value' => t('Refresh'),
+      '#submit' => array('_lingwo_fields_submit_change_pos'),
+      '#ahah' => $ahah + array('event' => 'click'),
+      '#parents' => array('_lingwo_fields', 'refresh'),
+      '#attributes' => array('class' => 'no-js'),
+      '#ahah_disable_validation' => TRUE,
+    );
+  };
 
   $element['wrapper']['_lingwo_fields'] = $_lingwo_fields;
 

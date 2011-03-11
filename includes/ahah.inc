@@ -29,9 +29,17 @@ function _lingwo_ahah_callback($form_item=NULL) {
   $form['#programmed'] = $form['#redirect'] = FALSE;
 
   // prevents submit, not sure what other consequences this has
+  //$form_state['rebuild'] = TRUE;
   $form_state['submitted'] = TRUE;
 
-  if (!isset($_POST['op'])) {
+  if (!empty($_POST['op'])) {
+    // attempt to track down the clicked button
+    $clicked_button = _lingwo_ahah_get_clicked_button($form);
+  }
+
+  // if AHAH is activated via a control which is not a button *OR* the button has
+  // requested that validation is disabled, then we disable validation.
+  if (!isset($_POST['op']) || (isset($clicked_button) && $clicked_button['#ahah_disable_validation'])) {
     unset(
       $form['#validate'],
       $form['#submit'],
@@ -61,6 +69,20 @@ function _lingwo_ahah_disable_validation(&$form) {
   foreach (element_children($form) as $child) {
     $form[$child]['#validated'] = TRUE;
     _lingwo_ahah_disable_validation($form[$child]);
+  }
+}
+
+function _lingwo_ahah_get_clicked_button($form) {
+  foreach (element_children($form) as $name) {
+    $child = $form[$name];
+    if ($child['#type'] == 'submit' && $child['#value'] == $_POST['op']) {
+      return $child;
+    }
+    else {
+      if ($ret = _lingwo_ahah_get_clicked_button($child)) {
+        return $ret;
+      }
+    }
   }
 }
 
