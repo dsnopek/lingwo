@@ -190,8 +190,8 @@ function lingwo_entry_load($node) {
   watchdog('lingwo_entry', 'Unable to get pos value for this entry: !nid', array('!nid' => $nid), WATCHDOG_WARNING);
 }
 
-function _lingwo_entry_generate_hash($node) {
-  return sha1(join(':', array($node->language, $node->pos, $node->title)));
+function _lingwo_entry_generate_hash($entry) {
+  return sha1(join(':', array(implode('-', $entry->getLanguages()), $entry->pos, $entry->headword)));
 }
 
 /**
@@ -199,7 +199,7 @@ function _lingwo_entry_generate_hash($node) {
  */
 function lingwo_entry_insert($node) {
   $entry = LingwoEntry::fromNode($node);
-  $entry_hash = _lingwo_entry_generate_hash($node);
+  $entry_hash = _lingwo_entry_generate_hash($entry);
 
   // If its not a translation, record on the main lookup table (ensures uniqueness)
   if (!$entry->isTranslation()) {
