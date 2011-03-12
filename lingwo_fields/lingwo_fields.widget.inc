@@ -295,7 +295,7 @@ function _lingwo_fields_submit_add_new_form($form, &$form_state) {
  */
 
 function template_preprocess_lingwo_fields_widget_form(&$vars) {
-  $vars['fields'] = LingwoField::mapItems($vars['element']);
+  $vars['fields'] = LingwoFields::mapItems($vars['element']);
 }
 
 function theme_lingwo_fields_widget_form($element) {
