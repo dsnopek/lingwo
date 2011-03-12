@@ -59,7 +59,15 @@ function _lingwo_allowed_values($settings, $name, $language, $translate=FALSE, $
 
 // Returns the top-level project path
 function _lingwo_project_path() {
-  return dirname(__FILE__) .'/../';
+  static $project_path = NULL;
+  if (is_null($project_path)) {
+    $project_path = dirname(drupal_get_path('module', 'lingwo_entry'));
+  }
+  return $project_path;
+}
+
+function _lingwo_project_dirname() {
+  return dirname(dirname(__FILE__));
 }
 
 // Helper for generating UUIDs

@@ -251,7 +251,7 @@ function lingwo_entry_delete(&$node) {
 function lingwo_entry_help($path, $arg) {
   switch ($path) {
     case 'admin/help#lingwo_entry':
-      $output = file_get_contents(_lingwo_project_path() .'/README.txt');
+      $output = file_get_contents(_lingwo_project_dirname() .'/README.txt');
       return '<pre>'. check_plain($output) .'</pre>';
     case 'admin/settings/lingwo':
       return '<p>'. t("Lingwo allows site builders to create online dictionaries.  Here you can just the most basic settings that define a dictionary entry.  If you have more modules from the Lingwo family installed, you will see tabs for each of them here.") .'</p>';
