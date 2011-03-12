@@ -9,7 +9,7 @@
 require_once(dirname(__FILE__) .'/../includes/settings.inc');
 
 class LingwoLanguageSettings extends LingwoSettings {
-  protected $base_name = 'language_language';
+  protected $base_name = 'lingwo_language';
 
   private $defaults = array(
     'content_type' => 'lingwo_language',
