@@ -70,6 +70,9 @@ function _lingwo_senses_widget_original($node) {
         '#default_value' => $sense['data']['example'],
         '#maxlength' => 255,
       );
+      if (LingwoSenses::$settings->example == 'multiple') {
+        $row['data']['example']['#description'] = t('You either put multiple examples, one on each line.  Or a single multi-line example.');
+      }
     }
 
     $relationship_options = LingwoSenses::getRelationshipOptions(TRUE);
@@ -174,6 +177,9 @@ function _lingwo_senses_widget_translation($node) {
           '#default_value' => $sense['data']['example_translation'],
           '#maxlength' => 255,
         );
+        if (LingwoSenses::$settings->example == 'multiple') {
+          $sense_form['data']['example_translation']['#description'] = t('Match each line of the translation, with a line in the original.');
+        }
       }
     }
 
