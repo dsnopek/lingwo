@@ -35,7 +35,7 @@ function lingwo_language_node_info() {
     'module' => 'lingwo_language',
     'description' => 'A language definition.',
     'has_title' => TRUE,
-    'title_label' => 'Headword',
+    'title_label' => 'Title',
     'has_body' => FALSE,
     'locked' => FALSE,
   );
