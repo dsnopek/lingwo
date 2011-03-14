@@ -173,7 +173,7 @@ function _lingwo_senses_widget_translation($node) {
         );
         $sense_form['data']['example_translation'] = array(
           '#type' => (LingwoSenses::$settings->example == 'multiple') ? 'textarea' : 'textfield',
-          '#title' => t('Translation of Example'),
+          '#title' => t('Translation of example'),
           '#default_value' => $sense['data']['example_translation'],
           '#maxlength' => 255,
         );
