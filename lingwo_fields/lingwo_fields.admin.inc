@@ -76,7 +76,7 @@ function _lingwo_fields_lingwo_language_form($language) {
   $add_field = _lingwo_fields_admin_field_form(t('Add field'), array());
   $add_field['pos'] = array(
     '#type' => 'select',
-    '#title' => t('Part of Speech'),
+    '#title' => t('Part of speech'),
     '#options' => $pos_options,
     '#weight' => -11,
   );

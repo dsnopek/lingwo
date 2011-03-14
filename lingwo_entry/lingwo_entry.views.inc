@@ -49,8 +49,8 @@ function lingwo_entry_views_data() {
       ),
 
       'pos' => array(
-        'title' => t('Part Of Speech'),
-        'help' => t('The Part of Speech if this is a dictionary entry'),
+        'title' => t('Part of speech'),
+        'help' => t('The part of speech if this is a dictionary entry'),
 
         'field' => array(
           'handler' => 'lingwo_entry_views_handler_field_pos',

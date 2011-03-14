@@ -161,7 +161,7 @@ function _lingwo_senses_widget_translation($node) {
       if ($orig_sense['data']['difference']) {
         $sense_form['data']['difference'] = array(
           '#type' => 'item',
-          '#title' => t('Difference'),
+          '#title' => LingwoSenses::$settings->difference == 'definition' ? t('Definition') : t('Difference'),
           '#value' => check_plain($orig_sense['data']['difference']),
         );
       }

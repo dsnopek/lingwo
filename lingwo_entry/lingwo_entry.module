@@ -364,7 +364,7 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
       '#prefix' => '<div id="lingwo_entry-pos-wrapper">',
       '#suffix' => '</div>',
       '#type' => 'select',
-      '#title' => t('Part of Speech'),
+      '#title' => t('Part of speech'),
       '#options' => LingwoEntry::getPosOptions($node->language, TRUE),
       '#default_value' => $node->pos,
       '#required' => TRUE,
@@ -391,7 +391,7 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
       // add a reload button if different languages can have different sets of POS values
       $form['pos_reload'] = array(
         '#type' => 'submit',
-        '#value' => t('Refresh Part of Speech list'),
+        '#value' => t('Refresh part of speech list'),
         '#submit' => array('_lingwo_form_to_node'),
         '#parents' => array('_lingwo_entry', 'reload_pos'),
         '#ahah' => array(
@@ -419,14 +419,14 @@ function lingwo_entry_content_extra_fields($type_name) {
 
   if (LingwoEntry::$settings->content_type == $type_name) {
     $extra['pos'] = array(
-      'label' => t('Part of Speech'),
-      'description' => t('Lingwo dictionary "Part of Speech" field.'),
+      'label' => t('Part of speech'),
+      'description' => t('Lingwo dictionary "Part of speech" field.'),
       'weight' => 0,
     );
     if (module_exists('lingwo_language')) {
       $extra['pos_reload'] = array(
-        'label' => t('Refresh Part of Speech list'),
-        'description' => t('Refresh button for Lingwo dictionary "Part of Speech" field (only shown when JavaScript is disabled).'),
+        'label' => t('Refresh part of speech list'),
+        'description' => t('Refresh button for Lingwo dictionary "Part of speech" field (only shown when JavaScript is disabled).'),
         'weight' => 0,
       );
     }
@@ -489,9 +489,9 @@ function lingwo_entry_lingwo_language_form($language) {
   $value = $language->getValue('lingwo_entry_pos_allowed_values', LingwoEntry::$settings->pos_allowed_values);
   $form['lingwo_entry_pos_allowed_values'] = array(
     '#type' => 'textarea',
-    '#title' => t('Part of Speech Allowed Values'),
+    '#title' => t('Part of speech list'),
     '#default_value' => $value,
-    '#description' => t('A list of allowed values for the "Part of Speech" field.  Put one part of speech on each line.  Use the pipe symbol if you want the part of speech to have an alternate display name, for example: <em>n|Noun</em>.'),
+    '#description' => t('A list of allowed values for the "Part of speech" field.  Put one part of speech on each line.  Use the pipe symbol if you want the part of speech to have an alternate display name, for example: <em>n|Noun</em>.'),
     '#required' => TRUE,
   );
   return $form;

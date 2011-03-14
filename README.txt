@@ -54,7 +54,7 @@ lingwo_entry:
 
  * Core module on which all the other modules build
 
- * Adds a "Part of Speech" field to all entries and makes sure that all entries are unique according
+ * Adds a "Part of speech" field to all entries and makes sure that all entries are unique according
    to language, part of speech and headword.
  
  * Makes dictionary entries accesible through a lookup path.  For example:

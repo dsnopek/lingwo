@@ -21,7 +21,7 @@ function lingwo_entry_admin_settings() {
     '#title' => t('Add extra information to the node title'),
     '#options' => array(
       'language' => t('Language'),
-      'pos'      => t('Part of Speech'), 
+      'pos'      => t('Part of speech'), 
     ),
     '#default_value' => $settings->node_title_munging,
     '#description' => t('Activate this option to add extra information to the node title.  To include the same information in more customized way, disable this option and implement it in your theme.'),

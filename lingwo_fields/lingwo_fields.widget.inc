@@ -185,7 +185,7 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
   if (count($element['wrapper']['fields']) == 0) {
     $element['wrapper']['placeholder'] = array(
       '#type' => 'markup',
-      '#value' => '<p>'. t('No fields for this Language and Part of Speech') .'</p>'
+      '#value' => '<p>'. t('No fields for this <em>Language</em> and <em>Part of speech</em>') .'</p>'
     );
   }
 
