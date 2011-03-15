@@ -20,8 +20,8 @@ Installation
 	 * Click "edit" by the "Dictionary entry" type
 	 * Expand "Workflow settings" and change "Multilingual support" to "Enabled, with translation"
 	 * Click "Save content type"
-   - If you are using the views module, you may want to consider disabling the "dictionary" view
-     and enabling the "dictionary_multiple" view.
+   - If you are using the views module, you may want to consider disabling the "lingwo_dictionary"
+     view and enabling the "lingwo_dictionary_multiple" view.
  * If you want to using Lingwo to manage multiple senses on each entry, enable the "lingwo_senses"
    module.
 
@@ -48,7 +48,7 @@ Modules
    to language, part of speech and headword.
  * Makes dictionary entries accesible through a lookup path.  For example:
 
-   >  http://example.com/lookup/es-en/coche (noun)
+   >  http://example.com/lookup/es-en/coche(noun)
 
    (Links to the Spanish-English dictionary translation of the noun "coche".  This example uses
     the default lookup path "lookup", which can be altered in admin)

@@ -18,7 +18,7 @@ function lingwo_entry_views_default_views() {
    * View: dictionary
    */
   $view = new view;
-  $view->name = 'dictionary';
+  $view->name = 'lingwo_dictionary';
   $view->description = 'Dictionary listing';
   $view->tag = 'lingwo';
   $view->view_php = '';
@@ -104,7 +104,7 @@ function lingwo_entry_views_default_views() {
    * View: dictionary_multiple
    */
   $view = new view;
-  $view->name = 'dictionary_multiple';
+  $view->name = 'lingwo_dictionary_multiple';
   $view->description = 'Dictionary listing';
   $view->tag = 'lingwo';
   $view->view_php = '';
