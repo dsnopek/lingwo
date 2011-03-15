@@ -10,6 +10,16 @@
 require_once('lingwo_language.api.inc');
 
 /**
+ * Implementation of hook_help().
+ */
+function lingwo_language_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#lingwo_language':
+      return '<p>'. t('Allows each language to have seperate definitions of some Lingwo\'s settings.  Create a new <em>Language definition</em> node to get started.') .'</p>';
+  }
+}
+
+/**
  * Implementation of hook_perm().
  */
 function lingwo_language_perm() {

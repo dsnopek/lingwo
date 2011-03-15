@@ -111,7 +111,7 @@ class LingwoFields implements IteratorAggregate {
     $out .= $data['javascript'];
     
     foreach (array_keys($data['pos']) as $pos) {
-      $out .= "lang.fields['$pos'] = {\n";
+      $out .= "lang.fields['". _lingwo_fields_check_js($pos) ."'] = {\n";
       $first = TRUE;
       foreach ($data['pos'][$pos] as $name => $field) {
         if ($first) {
@@ -121,9 +121,9 @@ class LingwoFields implements IteratorAggregate {
           $out .= ",\n";
         }
 
-        $out .= "'$name': {\n";
-        $out .= "type: '". $field['type'] ."'";
-        $out .= ",\nlabel: '". $field['label'] ."'";
+        $out .= "'". _lingwo_fields_check_js($name) ."': {\n";
+        $out .= "type: '". _lingwo_fields_check_js($field['type']) ."'";
+        $out .= ",\nlabel: '". _lingwo_fields_check_js($field['label']) ."'";
 
         // write options if necessary
         if ($field['type'] == 'option' and !empty($field['options'])) {
@@ -290,4 +290,11 @@ class LingwoFields implements IteratorAggregate {
 }
 
 LingwoFields::$settings = LingwoFieldsSettings::get();
+
+function _lingwo_fields_check_js($s) {
+  // prevent from breaking out of the single quoted string we use
+  $s = str_replace("\\", "\\\\", $s);
+  $s = str_replace("'",  "\\'",  $s);
+  return $s;
+}
 

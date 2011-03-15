@@ -31,6 +31,18 @@ function lingwo_fields_menu() {
 }
 
 /**
+ * Implementation of hook_help().
+ */
+function lingwo_fields_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#lingwo_fields':
+      return '<p>'. t('Adds support for "fields" to dictionary entries.  It allows you to specify multiple forms of each word, for example: plural of nouns or conjugation of verbs.  Configure it !here.', array('!here' => l(t('here'), 'admin/settings/lingwo/fields'))) .'</p>';
+    case 'admin/settings/lingwo/senses':
+      return '<p>'. t('Configure the fields provided for each <em>part of speech</em> on a dictionary entry.') .'</p>';
+  }
+}
+
+/**
  * Implementation of hook_perm().
  */
 function lingwo_fields_perm() {

@@ -336,8 +336,8 @@ function theme_lingwo_fields_formatter_default($node) {
 
     $element[] = array(
       '#type' => 'item',
-      '#title' => $label,
-      '#value' => $value,
+      '#title' => check_plain($label),
+      '#value' => check_plain($value),
       '#item'  => $field,
     );
   }
