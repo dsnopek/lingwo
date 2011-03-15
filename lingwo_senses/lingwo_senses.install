@@ -79,6 +79,9 @@ function lingwo_senses_install() {
   
   // give existing entries default senses
   _lingwo_senses_install_default_senses();
+
+  // we need to happen after the lingwo_entry module with weight 50
+  update_sql("UPDATE {system} SET weight = 51 WHERE name = 'lingwo_senses'");
 }
 
 /**

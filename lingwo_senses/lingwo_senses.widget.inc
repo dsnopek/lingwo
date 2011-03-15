@@ -75,7 +75,7 @@ function _lingwo_senses_widget_original($node) {
       }
     }
 
-    $relationship_options = LingwoSenses::getRelationshipOptions(TRUE);
+    $relationship_options = LingwoSenses::getRelationshipOptions($node->language, TRUE);
     if (!empty($relationship_options)) {
       // always have the ability to say it "is" a relationship to another entry
       $row['data']['is'] = array(
@@ -135,6 +135,25 @@ function _lingwo_senses_widget_original($node) {
     '#value' => count($items) > 1 ? t('Add another sense') : t('Setup multiple senses'),
     '#submit' => array('_lingwo_senses_add_submit'),
   );
+  // for reloading the current values
+  if (!$node->nid) {
+    $element['wrapper']['refresh'] = array(
+      '#type' => 'submit',
+      '#value' => t('Refresh'),
+      '#submit' => array('_lingwo_form_to_node'),
+      '#ahah' => array(
+        'path' => _lingwo_ahah_path(array('lingwo_senses', 'wrapper')),
+        'wrapper' => 'edit-lingwo_senses-wrapper',
+        'effect' => 'none',
+        'progress' => array(
+          'type' => 'none',
+        ),
+      ),
+      '#parents' => array('_lingwo_senses', 'refresh'),
+      '#attributes' => array('class' => 'no-js'),
+      '#ahah_disable_validation' => TRUE,
+    );
+  };
 
   return $element;
 }

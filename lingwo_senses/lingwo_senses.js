@@ -1,5 +1,14 @@
 
 Drupal.behaviors.lingwo_senses = function (context) {
+    // bind to language to trigger AHAH
+    $('#edit-language', context).change(function () {
+        var id = 'edit--lingwo-senses-refresh',
+            settings = Drupal.settings.ahah[id],
+            event_name = settings['event'],
+            selector = settings['selector'];
+        $(selector).trigger(event_name);
+    });
+
     function makeToggleFunc(checkFunc, togglePart) {
         return function (node, anim) {
             var show = checkFunc(node),

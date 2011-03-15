@@ -34,12 +34,8 @@ function lingwo_senses_admin_settings_form() {
     '#default_value' => $settings->example,
   );
 
-  $form[$settings->name('relationship_allowed_values')] = array(
-    '#type' => 'textarea',
-    '#title' => t('Relationship Allowed Values'),
-    '#default_value' => $settings->relationship_allowed_values,
-    '#description' => t('A list of allowed values for the "Relationship" field.  Leave blank to disable relationships all together.'),
-  );
+  // merge in the relationship values from our hook_lingwo_language_form().
+  $form = array_merge($form, _lingwo_language_form('lingwo_senses_lingwo_language_form'));
 
   return system_settings_form($form);
 }

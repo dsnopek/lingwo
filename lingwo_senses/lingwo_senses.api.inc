@@ -49,8 +49,8 @@ class LingwoSenses {
 
   public static $settings;
 
-  public static function getRelationshipOptions($translate=FALSE, $option_name=NULL) {
-    return _lingwo_allowed_values(self::$settings, 'relationship', $translation, $option_name);
+  public static function getRelationshipOptions($language, $translate=FALSE, $option_name=NULL) {
+    return _lingwo_allowed_values(self::$settings, 'relationship', $language, $translate, $option_name);
   }
 
   /*
