@@ -121,6 +121,16 @@ function lingwo_entry_node_type($op, $info) {
  * Implementation of hook_access().
  */
 function lingwo_entry_access($op, $node, $account) {
+  // Because drupal 6 lacks the hook_node_access() that Drupal 7 has,  we implement
+  // a hook which mirrors it here.
+  $access = module_invoke_all('lingwo_entry_access', $node, $op, $account);
+  if (in_array('deny', $access, TRUE)) {
+    return FALSE;
+  }
+  elseif (in_array('allow', $access, TRUE)) {
+    return TRUE;
+  }
+
   if ($op == 'create') {
     return user_access('create Lingwo entry content', $account);
   }
