@@ -188,18 +188,13 @@ function theme_lingwo_senses_translation($node, $items=NULL) {
   };
   $output .= '</ol>';
 
-  // TODO: while this is an awesome idea, it has problems.  (1) it doesn't belong in lingwo_senses
-  // because it is UX.  It should go in the theme or lingwoorg_dictionary. (2) it doesn't check
-  // for edit permissions.  I've added trac ticket #42 to try and re-instate it somewhere.
-  /*
-  if ($without_translations > 0) {
-    $output .= '<p>';
+  if ($without_translations > 0 && node_access('update', $node)) {
+    $output .= '<p><strong>';
     $output .= t('There are @count senses without translations.', array('@count' => $without_translations));
     $output .= '  ';
-    $output .= l(t('Edit this entry and contribute!'), 'node/'. $node->nid .'/edit');
-    $output .= '</p>';
+	$output .= t('!edit and contribute!', array('!edit' => l(t('Edit this entry'), 'node/'. $node->nid .'/edit')));
+    $output .= '</strong></p>';
   }
-  */
 
   drupal_add_css(drupal_get_path('module', 'lingwo_senses') .'/lingwo_senses.css');
   return $output;
