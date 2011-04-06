@@ -7,7 +7,9 @@
  */
 
 function _lingwo_senses_widget_original($node) {
-  $items = $node->lingwo_senses;
+  // TODO: should we just pass in an entry?
+  $entry = LingwoEntry::fromNode($node);
+
   $difference = LingwoSenses::$settings->difference;
 
   $element = array(
@@ -25,40 +27,31 @@ function _lingwo_senses_widget_original($node) {
     '#parents' => array('lingwo_senses'),
   );
 
-  // if there are no items..
-  if (count($items) == 0) {
-    $items[] = array('data' => array());
-  }
-
   // we count it as empty if there is less than 2 senses!
   $index = 0;
-  foreach ($items as $sense) {
-    if (!isset($sense['id'])) {
-      $sense['id'] = _lingwo_make_uuid();
-    }
-
+  foreach ($entry->senses as $sense) {
     $row['id'] = array(
       '#type' => 'hidden',
-      '#value' => $sense['id'],
+      '#value' => $sense->id,
     );
 
-    if ($difference != 'morethanone' || count($items) > 1) {
+    if ($difference != 'morethanone' || count($entry->senses) > 1) {
       // if our difference mode is 'morethanone', only edit the
       // difference when there are multiple senses
       $row['data']['difference'] = array(
         '#title' => $difference == 'definition' ? t('Definition') : t('Difference'),
         '#type' => 'textfield',
-        '#default_value' => $sense['data']['difference'],
+        '#default_value' => $sense->difference,
         '#maxlength' => 255,
       );
     }
     else {
       // but preserve the value for if we delete down to one sense
-      if ($sense['data']['difference']) {
+      if ($sense->difference) {
         $row['data']['difference'] = array(
           '#title' => t('Difference'),
           '#type' => 'item',
-          '#value' => $sense['data']['difference'],
+          '#value' => $sense->difference,
         );
       }
     }
@@ -67,7 +60,7 @@ function _lingwo_senses_widget_original($node) {
       $row['data']['example'] = array(
         '#title' => t('Example'),
         '#type' => (LingwoSenses::$settings->example == 'multiple') ? 'textarea' : 'textfield',
-        '#default_value' => $sense['data']['example'],
+        '#default_value' => implode("\n", $sense->example),
         '#maxlength' => 255,
       );
       if (LingwoSenses::$settings->example == 'multiple') {
@@ -82,7 +75,7 @@ function _lingwo_senses_widget_original($node) {
         '#type' => 'fieldset',
         '#title' => t('Relationship'),
         '#collapsible' => TRUE,
-        '#collapsed' => empty($sense['data']['is']['relationship']),
+        '#collapsed' => empty($sense->is['relationship']),
         //'#prefix' => '<div class="inline-controls clear-block">',
         //'#suffix' => '</div>',
       );
@@ -92,18 +85,18 @@ function _lingwo_senses_widget_original($node) {
         '#type'  => 'select',
         // TODO: should come from lingwo_language (or indirectly from a hook)
         '#options' => $is_relationship_options,
-        '#default_value' => $sense['data']['is']['relationship'],
+        '#default_value' => $sense->is['relationship'],
         '#attributes' => array('class' => 'is-relationship'),
       );
       $row['data']['is']['headword'] = array(
         '#title' => 'to',
         '#type'  => 'textfield',
-        '#default_value' => $sense['data']['is']['headword'],
+        '#default_value' => $sense->is['headword'],
       );
       $row['data']['is']['pos'] = array(
         '#type'  => 'select',
         '#options' => LingwoEntry::getPosOptions($node->language, TRUE),
-        '#default_value' => $sense['data']['is']['pos'],
+        '#default_value' => $sense->is['pos'],
       );
     }
 
@@ -114,7 +107,7 @@ function _lingwo_senses_widget_original($node) {
       '#default_value' => $index,
     );
 
-    if (count($items) > 1) {
+    if (count($entry->senses) > 1) {
       $row['remove_sense'] = array(
         '#type' => 'submit',
         '#value' => t('Remove Sense #@num', array('@num' => $index + 1)),
@@ -132,7 +125,7 @@ function _lingwo_senses_widget_original($node) {
   }
   $element['wrapper']['add_sense'] = array(
     '#type' => 'submit',
-    '#value' => count($items) > 1 ? t('Add another sense') : t('Setup multiple senses'),
+    '#value' => count($entry->senses) > 1 ? t('Add another sense') : t('Setup multiple senses'),
     '#submit' => array('_lingwo_senses_add_submit'),
   );
   // for reloading the current values
@@ -281,7 +274,7 @@ function _lingwo_senses_widget_translation($node) {
 
 function _lingwo_senses_add_submit($form, &$form_state) {
   $node = &_lingwo_form_to_node($form, $form_state);
-  array_push($node['lingwo_senses'], array('data' => array()));
+  array_push($node['lingwo_senses'], array('id' => _lingwo_make_uuid(), 'data' => array()));
 }
 
 function _lingwo_senses_remove_submit($form, &$form_state) {
