@@ -187,12 +187,12 @@ function _lingwo_senses_widget_translation($node) {
         $sense_form['data']['example'] = array(
           '#type' => 'item',
           '#title' => t('Example'),
-          '#value' => LingwoSenses::$settings->example == 'multiple' ? str_replace("\n", "<br />", check_plain($sense->raw_example)) : check_plain($sense->raw_example),
+          '#value' => implode('<br>', array_filter($sense->example, 'check_plain')),
         );
         $sense_form['data']['example_translation'] = array(
           '#type' => (LingwoSenses::$settings->example == 'multiple') ? 'textarea' : 'textfield',
           '#title' => t('Translation of example'),
-          '#default_value' => $sense->raw_example_translation,
+          '#default_value' => implode("\n", $sense->example_translation),
           '#maxlength' => 255,
         );
         if (LingwoSenses::$settings->example == 'multiple') {
