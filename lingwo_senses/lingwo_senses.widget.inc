@@ -159,7 +159,8 @@ function _lingwo_senses_widget_original($node) {
 }
 
 function _lingwo_senses_widget_translation($node) {
-  $senses = LingwoEntry::fromNode($node)->senses->getTranslations();
+  // TODO: should we just pass an entry in?
+  $entry = LingwoEntry::fromNode($node);
 
   $element = array(
     '#type' => 'fieldset',
@@ -168,32 +169,30 @@ function _lingwo_senses_widget_translation($node) {
   );
 
   $index = 0;
-  foreach ($senses as $sense) {
-    $orig_sense = $sense['orig_sense'];
-
+  foreach ($entry->senses as $sense) {
     $sense_form = array();
     $sense_form['id'] = array(
       '#type' => 'hidden',
-      '#value' => $sense['id'],
+      '#value' => $sense->id,
     );
-    if ($orig_sense) {
-      if ($orig_sense['data']['difference']) {
+    if ($sense->hasOriginal()) {
+      if ($sense->difference) {
         $sense_form['data']['difference'] = array(
           '#type' => 'item',
           '#title' => LingwoSenses::$settings->difference == 'definition' ? t('Definition') : t('Difference'),
-          '#value' => check_plain($orig_sense['data']['difference']),
+          '#value' => check_plain($sense->difference),
         );
       }
-      if ($orig_sense['data']['example'] && LingwoSenses::$settings->example != 'none') {
+      if (!empty($sense->example)) {
         $sense_form['data']['example'] = array(
           '#type' => 'item',
           '#title' => t('Example'),
-          '#value' => LingwoSenses::$settings->example == 'multiple' ? str_replace("\n", "<br />", check_plain($orig_sense['data']['example'])) : check_plain($orig_sense['data']['example']),
+          '#value' => LingwoSenses::$settings->example == 'multiple' ? str_replace("\n", "<br />", check_plain($sense->raw_example)) : check_plain($sense->raw_example),
         );
         $sense_form['data']['example_translation'] = array(
           '#type' => (LingwoSenses::$settings->example == 'multiple') ? 'textarea' : 'textfield',
           '#title' => t('Translation of example'),
-          '#default_value' => $sense['data']['example_translation'],
+          '#default_value' => $sense->raw_example_translation,
           '#maxlength' => 255,
         );
         if (LingwoSenses::$settings->example == 'multiple') {
@@ -202,9 +201,9 @@ function _lingwo_senses_widget_translation($node) {
       }
     }
 
-    if (!empty($orig_sense['data']['is']['relationship'])) {
+    if (!empty($sense->is['relationship'])) {
       $sense_form['data']['relationship'] = array(
-        '#value' => theme('lingwo_senses_relationship', $node, $orig_sense['data'])
+        '#value' => theme('lingwo_senses_relationship', $node, $sense),
       );
     }
     else {
@@ -213,12 +212,12 @@ function _lingwo_senses_widget_translation($node) {
         '#prefix' => "<div id=\"edit-lingwo-senses-$index-data-translation-wrapper\">",
         '#suffix' => '</div>',
       );
-      if (count($senses) > 1) {
+      if (count($entry->senses) > 1) {
         $sense_form['data']['translation']['clue'] = array(
           '#type' => 'textfield',
           '#title' => t('Clue'),
           '#description' => t('A couple words that will clue the reader to how this sense is different.'),
-          '#default_value' => $sense['data']['clue'],
+          '#default_value' => $sense->clue,
           '#maxlength' => 255,
         );
       }
@@ -227,10 +226,10 @@ function _lingwo_senses_widget_translation($node) {
         '#prefix' => "<div id=\"edit-lingwo-senses-$index-data-translation-trans-wrapper\">",
         '#suffix' => "</div>",
       );
-      for ($t = 0; $t < max(3, count($sense['data']['trans'])); $t++) {
+      for ($t = 0; $t < max(3, count($sense->trans)); $t++) {
         $sense_form['data']['translation']['trans'][$t] = array(
           '#type' => 'textfield',
-          '#default_value' => $sense['data']['trans'][$t]
+          '#default_value' => $sense->trans[$t]
         );
       }
       $sense_form['data']['translation']['trans']['0']['#title'] = t('Translation');
@@ -238,16 +237,16 @@ function _lingwo_senses_widget_translation($node) {
       $sense_form['data']['translation']['no_equivalent'] = array(
         '#title' => t('No equivalent in this language'),
         '#type'  => 'checkbox',
-        '#default_value' => $sense['data']['no_equivalent'],
+        '#default_value' => $sense->no_equivalent,
         '#attributes' => array('class' => 'no-equivalent-checkbox'),
       );
 
-      if (count($senses) > 1) {
+      if (count($entry->senses) > 1) {
         $same_as_options = array('' => '-');
         $same_as_count = 1;
-        foreach ($senses as $sense2) {
-          if (!empty($sense2['id']) && $sense2['id'] != $sense['id']) {
-            $same_as_options[$sense2['id']] = t('Sense #@sense_num', array('@sense_num' => $same_as_count));
+        foreach ($entry->senses as $sense2) {
+          if (!empty($sense2->id) && $sense2->id != $sense->id) {
+            $same_as_options[$sense2->id] = t('Sense #@sense_num', array('@sense_num' => $same_as_count));
           }
           $same_as_count++;
         }
@@ -256,13 +255,13 @@ function _lingwo_senses_widget_translation($node) {
           '#title' => t('Same as'),
           '#type' => 'select',
           '#options' => $same_as_options,
-          '#default_value' => !empty($sense['data']['same_as']) ? $sense['data']['same_as'] : '',
+          '#default_value' => !empty($sense->same_as) ? $sense->same_as : '',
           '#attributes' => array('class' => 'same-as-select'),
         );
       }
     }
 
-    if (!$orig_sense) {
+    if (!$sense->hasOriginal()) {
       $sense_form['old_sense_message'] = array(
         '#prefix' => '<div class="lingwo-sense-old-message">* ',
         '#value' => t('This translation is for a sense that has been removed from the entry.'),

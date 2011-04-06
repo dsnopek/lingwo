@@ -110,39 +110,25 @@ function theme_lingwo_senses_translation($node, $items=NULL) {
   $output = '';
   $output .= '<ol class="lingwo-senses">';
 
-  if (is_null($items)) {
-    $items = LingwoEntry::fromNode($node)->senses->getTranslations();
-  }
-
-  # group the ids together
-  $ids = array();
-  foreach ($items as $sense) {
-    if ($sense['data']['same_as']) {
-      $ids[$sense['data']['same_as']][] = $sense['id'];
-    }
-    else {
-      $ids[$sense['id']][] = $sense['id'];
-    }
-  }
+  // TODO: should we just pass an entry to this theme function instead?
+  $entry = LingwoEntry::fromNode($node);
 
   $without_translations = 0;
-  foreach ($items as $sense) {
-    if (!empty($sense['data']['same_as'])) {
+  foreach ($entry->senses as $sense) {
+    if (!empty($sense->same_as)) {
       continue;
     }
-    $orig_sense = $sense['orig_sense'];
-    $sense_id = $sense['id'];
-    $sense = $sense['data'];
 
     $values = array();
-    if ($sense['no_equivalent']) {
+
+    if ($sense->no_equivalent) {
       $values[] = '<strong><span class="lingwo-sense-no-equivalent">'. t('No equivalent in this language') .'</span></strong>';
     }
-    elseif (!empty($orig_sense['data']['is']['relationship'])) {
-      $values[] = theme('lingwo_senses_relationship', $node, $orig_sense['data']);
+    elseif (!empty($sense->is['relationship'])) {
+      $values[] = theme('lingwo_senses_relationship', $node, $sense);
     }
-    elseif (!empty($sense['trans'])) {
-      foreach ($sense['trans'] as $value) {
+    elseif (!empty($sense->trans)) {
+      foreach ($sense->trans as $value) {
         if (!empty($value)) {
           // TODO: re-instate this!
           //$values[] = l($value, 'entry/'. $trans->target_lang .'/'. $entry->pos .'/'. $value);
@@ -157,27 +143,26 @@ function theme_lingwo_senses_translation($node, $items=NULL) {
     }
 
     $output_ids = array();
-    foreach ($ids[$sense_id] as $id) {
+    foreach ($sense->getIds() as $id) {
       $output_ids[] = 'lingwo-sense-id-'. $id;
     }
     $output_ids = implode(' ', $output_ids);
 
     $output .= '<li class="lingwo-sense '. $output_ids .'">';
-    if ($sense['clue']) {
-      $output .= '<span class="lingwo-sense-clue">('. check_plain($sense['clue']) .')</span> ';
+    if ($sense->clue) {
+      $output .= '<span class="lingwo-sense-clue">('. check_plain($sense->clue) .')</span> ';
     }
 
     $output .= join(', ', $values);
 
-    if (!empty($orig_sense['data']['example']) && LingwoSenses::$settings->example != 'none') {
+    if (!empty($sense->example)) {
       $output .= '<blockquote class="lingwo-sense-example">';
-      if (LingwoSenses::$settings->example == 'single' && empty($sense['example_translation'])) {
-        $output .= check_plain($orig_sense['data']['example']);
+      if (count($sense->example) == 1 && empty($sense->example_translation)) {
+        $output .= check_plain($sense->example[0]);
       }
       else {
-        $example_lines = array_map(NULL, explode("\n", $orig_sense['data']['example']), explode("\n", $sense['example_translation']));
         $output .= '<table>';
-        foreach ($example_lines as $line) {
+        foreach ($sense->getTranslatedExample(TRUE) as $line) {
           $output .= '<tr><td width="50%">'. check_plain($line[0]) . '</td><td width="50%">'. check_plain($line[1]) .'</td></tr>';
         }
         $output .= '</table>';
