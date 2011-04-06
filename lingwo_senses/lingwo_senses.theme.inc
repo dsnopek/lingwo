@@ -72,27 +72,25 @@ function theme_lingwo_senses_translation_form($form) {
 }
 
 function theme_lingwo_senses_original($node) {
-  $items = $node->lingwo_senses;
-  if (!empty($items)) {
+  // TODO: should we pass in an entry?
+  $entry = LingwoEntry::fromNode($node);
+  if (count($entry->senses) > 0) {
     $output .= '<ol class="lingwo-senses">';
-    foreach ($items as $sense) {
-      $sense_id = $sense['id'];
-      $sense = $sense['data'];
-
-      $output .= '<li class="lingwo-sense lingwo-sense-id-'. $sense_id .'">';
-      if (!empty($sense['is']['relationship'])) {
+    foreach ($entry->senses as $sense) {
+      $output .= '<li class="lingwo-sense lingwo-sense-id-'. $sense->id .'">';
+      if (!empty($sense->is['relationship'])) {
         $output .= '<span class="lingwo-sense-relationship">'. theme('lingwo_senses_relationship', $node, $sense) .'</span>';
       }
-      elseif ($sense['difference']) {
-        $output .= '<span class="lingwo-sense-difference">'. check_plain($sense['difference']) .'</span>';
+      elseif (!empty($sense->difference)) {
+        $output .= '<span class="lingwo-sense-difference">'. check_plain($sense->difference) .'</span>';
       }
       else {
         $output .= '<span class="lingwo-sense-no-difference">(';
         $output .= t('No difference given');
         $output .= ')</span>';
       }
-      if ($sense['example'] && LingwoSenses::$settings->example != 'none') {
-        $output .= ': <blockquote class="lingwo-sense-example">'. (LingwoSenses::$settings->example == 'multiple' ? str_replace("\n", "<br />", check_plain($sense['example'])) : check_plain($sense['example'])) .'</blockquote>';
+	  if (!empty($sense->example)) {
+        $output .= ': <blockquote class="lingwo-sense-example">'. implode('<br>', array_filter($sense->example, 'check_plain')) .'</blockquote>';
       }
       $output .= '</li>';
     };
@@ -106,7 +104,7 @@ function theme_lingwo_senses_original($node) {
   return $output;
 }
 
-function theme_lingwo_senses_translation($node, $items=NULL) {
+function theme_lingwo_senses_translation($node) {
   $output = '';
   $output .= '<ol class="lingwo-senses">';
 
