@@ -241,8 +241,13 @@ function lingwo_senses_nodeapi(&$node, $op, $a3=NULL, $a4=NULL) {
  * Implementation of hook_lingwo_locale_refresh().
  */
 function lingwo_senses_lingwo_locale_refresh() {
-  foreach (LingwoSenses::getRelationshipOptions() as $key => $value) {
-    i18nstrings_update('lingwo:field:relationship:option_'. $key, $value);
+  $languages = language_list();
+  $languages = $languages[1];
+
+  foreach ($languages as $language) {
+    foreach (LingwoSenses::getRelationshipOptions($language->language) as $key => $value) {
+      i18nstrings_update('lingwo:field:relationship:option_'. $key, $value);
+    }
   }
 }
 
