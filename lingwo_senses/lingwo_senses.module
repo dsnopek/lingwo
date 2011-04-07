@@ -71,7 +71,7 @@ function lingwo_senses_theme() {
       'file' => 'lingwo_senses.theme.inc',
     ),
     'lingwo_senses_translation' => array(
-      'arguments' => array('node' => NULL, 'items' => NULL),
+      'arguments' => array('node' => NULL, 'options' => NULL),
       'file' => 'lingwo_senses.theme.inc',
     ),
     'lingwo_senses_relationship' => array(

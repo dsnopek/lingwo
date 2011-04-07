@@ -169,11 +169,11 @@ function _lingwo_senses_widget_translation($node) {
       '#value' => $sense->id,
     );
     if ($sense->hasOriginal()) {
-      if ($sense->difference) {
+      if ($sense->difference || !empty($sense->is['relationship'])) {
         $sense_form['data']['difference'] = array(
           '#type' => 'item',
           '#title' => LingwoSenses::$settings->difference == 'definition' ? t('Definition') : t('Difference'),
-          '#value' => check_plain($sense->difference),
+          '#value' => !empty($sense->is['relationship']) ? theme('lingwo_senses_relationship', $node, $sense) : check_plain($sense->difference),
         );
       }
       if (!empty($sense->example)) {
@@ -194,12 +194,7 @@ function _lingwo_senses_widget_translation($node) {
       }
     }
 
-    if (!empty($sense->is['relationship'])) {
-      $sense_form['data']['relationship'] = array(
-        '#value' => theme('lingwo_senses_relationship', $node, $sense),
-      );
-    }
-    else {
+    if (empty($sense->is['relationship'])) {
       $sense_form['data']['translation'] = array(
         '#parents' => array('lingwo_senses', $index, 'data'),
         '#prefix' => "<div id=\"edit-lingwo-senses-$index-data-translation-wrapper\">",

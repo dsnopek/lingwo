@@ -89,7 +89,7 @@ function theme_lingwo_senses_original($node) {
         $output .= t('No difference given');
         $output .= ')</span>';
       }
-	  if (!empty($sense->example)) {
+      if (!empty($sense->example)) {
         $output .= ': <blockquote class="lingwo-sense-example">'. implode('<br>', array_filter($sense->example, 'check_plain')) .'</blockquote>';
       }
       $output .= '</li>';
@@ -104,7 +104,10 @@ function theme_lingwo_senses_original($node) {
   return $output;
 }
 
-function theme_lingwo_senses_translation($node) {
+function theme_lingwo_senses_translation($node, $options=NULL) {
+  $options = (is_null($options) ? array() : $options) +
+    array('example' => TRUE, 'contribute' => TRUE);
+
   $output = '';
   $output .= '<ol class="lingwo-senses">';
 
@@ -153,7 +156,7 @@ function theme_lingwo_senses_translation($node) {
 
     $output .= join(', ', $values);
 
-    if (!empty($sense->example)) {
+    if ($options['example'] && !empty($sense->example)) {
       $output .= '<blockquote class="lingwo-sense-example">';
       if (count($sense->example) == 1 && empty($sense->example_translation)) {
         $output .= check_plain($sense->example[0]);
@@ -171,11 +174,11 @@ function theme_lingwo_senses_translation($node) {
   };
   $output .= '</ol>';
 
-  if ($without_translations > 0 && node_access('update', $node)) {
+  if ($options['contribute'] && $without_translations > 0 && node_access('update', $node)) {
     $output .= '<p><strong>';
     $output .= t('There are @count senses without translations.', array('@count' => $without_translations));
     $output .= '  ';
-	$output .= t('!edit and contribute!', array('!edit' => l(t('Edit this entry'), 'node/'. $node->nid .'/edit')));
+    $output .= t('!edit and contribute!', array('!edit' => l(t('Edit this entry'), 'node/'. $node->nid .'/edit')));
     $output .= '</strong></p>';
   }
 
@@ -193,8 +196,8 @@ function theme_lingwo_senses_relationship($node, $sense) {
     $spec = $source_lang = $target_lang = $node->language;
   }
 
-  $pos = $sense['is']['pos'];
-  $headword = $sense['is']['headword'];
+  $pos = $sense->is['pos'];
+  $headword = $sense->is['headword'];
 
   // TODO: this should be a function!
   // TODO: this should operate somehow, when we don't have a lookup path!
@@ -216,7 +219,7 @@ function theme_lingwo_senses_relationship($node, $sense) {
   ));
 
   return t('@rel of !entry', array(
-    '@rel' => LingwoSenses::getRelationshipOptions(TRUE, $sense['is']['relationship']),
+    '@rel' => LingwoSenses::getRelationshipOptions($node->language, TRUE, $sense->is['relationship']),
     '!entry' => $entry_text
   ));
 }
