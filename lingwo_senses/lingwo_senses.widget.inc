@@ -189,7 +189,7 @@ function _lingwo_senses_widget_translation($node) {
           '#maxlength' => 255,
         );
         if (LingwoSenses::$settings->example == 'multiple') {
-          $sense_form['data']['example_translation']['#description'] = t('Match each line of the translation, with a line in the original.');
+          $sense_form['data']['example_translation']['#description'] = t('Match each line of the translation with a line in the original.');
         }
       }
     }
@@ -214,13 +214,14 @@ function _lingwo_senses_widget_translation($node) {
         '#prefix' => "<div id=\"edit-lingwo-senses-$index-data-translation-trans-wrapper\">",
         '#suffix' => "</div>",
       );
-      for ($t = 0; $t < max(3, count($sense->trans)); $t++) {
-        $sense_form['data']['translation']['trans'][$t] = array(
+      for ($tindex = 0; $tindex < max(3, count($sense->trans)); $tindex++) {
+        $sense_form['data']['translation']['trans'][$tindex] = array(
           '#type' => 'textfield',
-          '#default_value' => $sense->trans[$t]
+          '#default_value' => $sense->trans[$tindex]
         );
       }
       $sense_form['data']['translation']['trans']['0']['#title'] = t('Translation');
+      $sense_form['data']['translation']['trans'][$tindex-1]['#description'] = t('Put only <em>1 translation</em> in each field.');
 
       $sense_form['data']['translation']['no_equivalent'] = array(
         '#title' => t('No equivalent in this language'),
