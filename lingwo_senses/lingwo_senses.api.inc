@@ -270,13 +270,13 @@ class LingwoSense {
     if (is_null($this->cached_example_translation)) {
       // example translations only make sense if we actually have an original!
       if (!is_null($this->orig_sense) && !is_null($this->trans_sense)) {
-        $this->cached_example_transation = $this->_fmtExample($this->trans_sense['data']['example_translation']);
+        $this->cached_example_translation = $this->_fmtExample($this->trans_sense['data']['example_translation']);
       }
       else {
         $this->cached_example_translation = array();
       }
     }
-    return $this->cached_example_transation;
+    return $this->cached_example_translation;
   }
 
   private function _getChildren() {
