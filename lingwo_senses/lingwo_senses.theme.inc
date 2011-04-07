@@ -156,14 +156,15 @@ function theme_lingwo_senses_translation($node, $options=NULL) {
 
     $output .= join(', ', $values);
 
-    if ($options['example'] && !empty($sense->example)) {
+    $translated_example = $sense->getTranslatedExample(TRUE);
+    if ($options['example'] && count($translated_example) > 0) {
       $output .= '<blockquote class="lingwo-sense-example">';
       if (count($sense->example) == 1 && empty($sense->example_translation)) {
         $output .= check_plain($sense->example[0]);
       }
       else {
         $output .= '<table>';
-        foreach ($sense->getTranslatedExample(TRUE) as $line) {
+        foreach ($translated_example as $line) {
           $output .= '<tr><td width="50%">'. check_plain($line[0]) . '</td><td width="50%">'. check_plain($line[1]) .'</td></tr>';
         }
         $output .= '</table>';
