@@ -219,7 +219,7 @@ function theme_lingwo_senses_relationship($node, $sense) {
   ));
 
   return t('@rel of !entry', array(
-    '@rel' => LingwoSenses::getRelationshipOptions($node->language, TRUE, $sense->is['relationship']),
+    '@rel' => LingwoSenses::getRelationshipOptions($source_lang, TRUE, $sense->is['relationship']),
     '!entry' => $entry_text
   ));
 }

@@ -197,7 +197,7 @@ function lingwo_entry_load($node) {
   // TODO: this should really be a watchdog message because it appears to happen normally when
   // mass deleting entries.
   // TODO: does this still occur when mass deleting entries?
-  watchdog('lingwo_entry', 'Unable to get pos value for this entry: !nid', array('!nid' => $nid), WATCHDOG_WARNING);
+  watchdog('lingwo_entry', 'Unable to get pos value for this entry: !nid', array('!nid' => $node->nid), WATCHDOG_WARNING);
 }
 
 function _lingwo_entry_generate_hash($entry) {
