@@ -70,10 +70,15 @@ class LingwoSenses implements IteratorAggregate, Countable {
     $this->node =& $entry->getNode();
 
     if (!isset($this->node->lingwo_senses)) {
-      // create a single empty sense
-      $this->node->lingwo_senses = array(
-        array('id' => _lingwo_make_uuid(), 'data' => array())
-      );
+      if ($this->entry->isTranslation()) {
+        $this->node->lingwo_senses = array();
+      }
+      else {
+        // create a single empty sense
+        $this->node->lingwo_senses = array(
+          array('id' => _lingwo_make_uuid(), 'data' => array())
+        );
+      }
     }
   }
 
