@@ -45,7 +45,7 @@ function _lingwo_language_value($settings, $name, $language) {
       $language = LingwoLanguage::fromCode($language);
     }
   }
-  if (!empty($language) && !is_a($language, '_LingwoLanguageNull')) {
+  if (!empty($language) && is_a($language, 'LingwoLanguage')) {
     $value = $language->getValue($settings->name($name));
   }
   if (is_null($value)) {
