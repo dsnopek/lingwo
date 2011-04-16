@@ -1,74 +1,29 @@
 /*
  A very lightweight implementation of CommonJS Asynchronous Module Definition and
  a compatible loader.
-
- This is originally modified from code written by Kris Zyp for Persevere project:
-
-   http://www.persvr.org
-
- Original version is dual-licensed under the Modified BSD license or Academic Free
- License version 2.1.
-
- My changes are licensed under the GPL version 2 or later, making this complete work
- available only under the terms of the GPL version 2 or later.
 */
 var require, define;
-(function(){
-	var factories = {},
-		modules = {};
-	function req(id){
-		var module = modules[id];
-		if(module){
-			return module;
-		}
-		if(!factories[id]){
-			throw new Error("Module " + id + " not found");
-		}
-		var factory = factories[id];
-		var args = factory.deps || (factory.length ? ["require", "exports", "module"] : []);
-		var exports = modules[id] = {};
-		for(var i = 0; i < args.length; i++){
-			var arg = args[i]; 
-			switch(arg){
-				case "require": arg = function(relativeId){
-					if(relativeId.charAt(0) === '.'){
-						relativeId = id.substring(0, id.lastIndexOf('/') + 1) + relativeId;
-						while(lastId !== relativeId){
-							var lastId = relativeId;
-							relativeId = relativeId.replace(/\/[^\/]*\/\.\.\//,'/');
-						}
-						relativeId = relativeId.replace(/\/\.\//g,'/');
-					}
-					return req(relativeId);
-				}; break;
-				case "exports":  arg = exports; break;
-				case "module": var module = arg = {exports: exports}; break;
-				default: arg = req(arg);
-			}
-			args[i] = arg;
-		}
-		
-		exports = factory.apply(this, args);
-		if(module && module.exports != modules[id]){
-			exports = module.exports;
-		}
-		if(exports){
-			return modules[id] = exports;
-		}
-		return modules[id];
-	}
-	require = function(modules, callback) {
-        var args = [];
-        for(var i = 0; i < modules.length; i++){
-            args.push(req(modules[i]));
-        }
-        callback.apply(req, args);
+(function () {
+    var modules = {};
+    define = function (name, deps, factory) {
+        modules[name] = { deps: deps, factory: factory };
     };
-    define = require.def = function(id, deps, factory){
-        if(typeof deps == "function"){
-            factories[id] = deps;
-        }else{
-            (factories[id] = factory).deps = deps; 
+    function load(name) {
+        var i, args;
+        if (typeof modules[name] == 'undefined') {
+            throw new Error('Cannot require undefined module: '+name);
         }
-	};
+        if (typeof modules[name].value == 'undefined') {
+            modules[name].value = require(modules[name].deps, modules[name].factory);
+        }
+        return modules[name].value;
+    }
+    require = function(deps, callback) {
+        var i, args = new Array(deps.length);
+        for (i = 0; i < deps.length; i++) {
+            args[i] = load(deps[i]);
+        }
+        return callback.apply(null, args);
+    };
 })();
+
