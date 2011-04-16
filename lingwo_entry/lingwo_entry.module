@@ -63,7 +63,7 @@ function lingwo_entry_menu() {
 
   if ($lookup_path = LingwoEntry::$settings->lookup_path) {
     $i = count(explode('/', $lookup_path));
-    $items[$lookup_path .'/%/%'] = array(
+    $items[$lookup_path . '/%/%'] = array(
       'page callback' => 'lingwo_entry_lookup_page',
       'page arguments' => array($i, $i+1),
       'access arguments' => array('access content'),
@@ -81,10 +81,10 @@ function lingwo_entry_menu() {
 function lingwo_entry_perm() {
   $perms[] = 'create Lingwo entry content';
   foreach (array('source', 'translation') as $type) {
-    $perms[] = 'delete own Lingwo entry '. $type .' content';
-    $perms[] = 'delete any Lingwo entry '. $type .' content';
-    $perms[] = 'edit own Lingwo entry '. $type .' content';
-    $perms[] = 'edit any Lingwo entry '. $type .' content';
+    $perms[] = 'delete own Lingwo entry ' . $type . ' content';
+    $perms[] = 'delete any Lingwo entry ' . $type . ' content';
+    $perms[] = 'edit own Lingwo entry ' . $type . ' content';
+    $perms[] = 'edit any Lingwo entry ' . $type . ' content';
   }
   return $perms;
 }
@@ -139,13 +139,13 @@ function lingwo_entry_access($op, $node, $account) {
   $type = _lingwo_is_translation($node) ? 'translation' : 'source';
 
   if ($op == 'update') {
-    return user_access('edit any Lingwo entry '. $type .' content', $account) || 
-           ($own && user_access('edit own Lingwo entry '. $type .' content', $account));
+    return user_access('edit any Lingwo entry ' . $type . ' content', $account) ||
+           ($own && user_access('edit own Lingwo entry ' . $type . ' content', $account));
   }
 
   if ($op == 'delete') {
-    return user_access('delete any Lingwo entry '. $type .' content', $account) || 
-           ($own && user_access('delete own Lingwo entry '. $type .' content', $account));
+    return user_access('delete any Lingwo entry ' . $type . ' content', $account) ||
+           ($own && user_access('delete own Lingwo entry ' . $type . ' content', $account));
   }
 }
 
@@ -174,9 +174,9 @@ function lingwo_entry_validate($node, &$form) {
     $existing = LingwoEntry::key2nid($node->language, $node->pos, $node->title);
 
     if ($existing && $existing != $node->nid) {
-      form_set_error('title', 
+      form_set_error('title',
         t('Entry with this language, part of speech and headword combination already exists: !link',
-          array('!link' => l($node->title, 'node/'. $existing))));
+          array('!link' => l($node->title, 'node/' . $existing))));
     }
   }
 }
@@ -260,10 +260,10 @@ function lingwo_entry_delete(&$node) {
 function lingwo_entry_help($path, $arg) {
   switch ($path) {
     case 'admin/help#lingwo_entry':
-      $output = file_get_contents(_lingwo_project_dirname() .'/README.txt');
-      return '<pre>'. check_plain($output) .'</pre>';
+      $output = file_get_contents(_lingwo_project_dirname() . '/README.txt');
+      return '<pre>' . check_plain($output) . '</pre>';
     case 'admin/settings/lingwo':
-      return '<p>'. t("Lingwo allows site builders to create online dictionaries.  Here you can just the most basic settings that define a dictionary entry.  If you have more modules from the Lingwo family installed, you will see tabs for each of them here.") .'</p>';
+      return '<p>' . t("Lingwo allows site builders to create online dictionaries.  Here you can just the most basic settings that define a dictionary entry.  If you have more modules from the Lingwo family installed, you will see tabs for each of them here.") . '</p>';
   }
 }
 
@@ -309,12 +309,12 @@ function lingwo_entry_block($op = 'list', $delta = 0, $edit = array()) {
 
     case 'view':
       if ($delta == 0 && user_access('access content')) {
-        require_once(dirname(__FILE__) .'/lingwo_entry.pages.inc');
+        require_once(dirname(__FILE__) . '/lingwo_entry.pages.inc');
         $block['subject'] = t('Search Dictionary');
         $block['content'] = drupal_get_form('lingwo_entry_search_form');
         return $block;
       }
-      break; 
+      break;
   }
 }
 
@@ -322,7 +322,7 @@ function lingwo_entry_block($op = 'list', $delta = 0, $edit = array()) {
  * Implementation of hook_form_alter().
  */
 function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id == (LingwoEntry::$settings->content_type .'_node_form')) {
+  if ($form_id == (LingwoEntry::$settings->content_type . '_node_form')) {
     $node =& $form['#node'];
 
     // allow some fields to be set automagically for new nodes
@@ -345,7 +345,7 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
         // remove language neutral and set language as required
         unset($form['language']['#options']['']);
         $form['language']['#required'] = TRUE;
-        
+
         // if no language is selected, we make the first one the current language
         if (empty($form['language']['#default_value'])) {
           $options = array_keys($form['language']['#options']);
@@ -415,7 +415,7 @@ function lingwo_entry_form_alter(&$form, $form_state, $form_id) {
         '#attributes' => array('class' => 'no-js'),
       );
 
-      drupal_add_js(drupal_get_path('module', 'lingwo_entry') .'/lingwo_entry.js');
+      drupal_add_js(drupal_get_path('module', 'lingwo_entry') . '/lingwo_entry.js');
     }
   }
 }
@@ -486,7 +486,7 @@ function lingwo_entry_lingwo_locale_refresh() {
 
   foreach ($languages as $language) {
     foreach (LingwoEntry::getPosOptions($language->language) as $key => $value) {
-      i18nstrings_update('lingwo:field:pos:option_'. $key, $value);
+      i18nstrings_update('lingwo:field:pos:option_' . $key, $value);
     }
   }
 }
@@ -539,7 +539,7 @@ function lingwo_entry_preprocess_node(&$vars) {
     // if enabled, we'll munge the node_title to include
     $munging = LingwoEntry::$settings->node_title_munging;
     if ($munging['language'] || $munging['pos']) {
-      $lang_spec_text = '['. implode(' &#8594; ', $vars['languages_human']) .']';
+      $lang_spec_text = '[' . implode(' &#8594; ', $vars['languages_human']) . ']';
       if (isset($vars['languages_icons'])) {
         $lang_spec_images = implode(' &#8594; ', $vars['languages_icons']);
         // HACK: helps this work on the default node/node.tpl.php -- really the user should modify
@@ -548,20 +548,20 @@ function lingwo_entry_preprocess_node(&$vars) {
       }
 
       if ($munging['language']) {
-        $vars['title'] = (isset($lang_spec_images) ? $lang_spec_images : $lang_spec_text) .' '. $vars['title'];
+        $vars['title'] = (isset($lang_spec_images) ? $lang_spec_images : $lang_spec_text) . ' ' . $vars['title'];
       }
       if ($munging['pos']) {
-        $vars['title'] .= ' ('. $vars['pos'] .')';
+        $vars['title'] .= ' (' . $vars['pos'] . ')';
       }
 
       // completely replace head_title if necessary
       if (isset($vars['head_title'])) {
         if ($munging['language']) {
-          $head_title = $lang_spec_text .' ';
+          $head_title = $lang_spec_text . ' ';
         }
         $head_title .= check_plain($vars['node']->title);
         if ($munging['pos']) {
-          $head_title .= ' ('. $vars['pos'] .')';
+          $head_title .= ' (' . $vars['pos'] . ')';
         }
 
         $vars['head_title'] = implode(' | ', array($head_title, variable_get('site_name', 'Drupal')));

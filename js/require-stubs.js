@@ -11,7 +11,7 @@ var require, define;
   function load(name) {
     var i, args;
     if (typeof modules[name] == 'undefined') {
-      throw new Error('Cannot require undefined module: '+name);
+      throw new Error('Cannot require undefined module: ' + name);
     }
     if (typeof modules[name].value == 'undefined') {
       modules[name].value = require(modules[name].deps, modules[name].factory);

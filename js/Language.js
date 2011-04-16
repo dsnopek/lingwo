@@ -84,7 +84,7 @@ define('lingwo/Language', ['lingwo/util/extendPrototype'],
 
         var rWord = this.word.lang.parseWord(text);
         var newWord = this.word.clone();
-        arrayReplace(newWord.letters, this.start+this.len, 0, rWord.letters);
+        arrayReplace(newWord.letters, this.start + this.len, 0, rWord.letters);
         return newWord;
       },
       'result': function (value) {
@@ -97,7 +97,7 @@ define('lingwo/Language', ['lingwo/util/extendPrototype'],
         return this.start != -1;
       },
       'toWord': function () {
-        return new this.wordcls(this.word.letters.slice(this.start, this.start+this.len));
+        return new this.wordcls(this.word.letters.slice(this.start, this.start + this.len));
       }
     });
 
@@ -299,9 +299,11 @@ define('lingwo/Language', ['lingwo/util/extendPrototype'],
           if (index > end)
           {
             // Nothing was found.
+            /*
             if (console && console.debug) {
               console.debug("nothing was found");
             }
+            */
             return null;
           }
         }

@@ -35,9 +35,9 @@ function lingwo_senses_menu() {
 function lingwo_senses_help($path, $arg) {
   switch ($path) {
     case 'admin/help#lingwo_senses':
-      return '<p>'. t('Adds support for "multiple senses" to dictionary entries.  It allows users to state how senses are different, provide examples and translate them individually.  Configure it !here.', array('!here' => l(t('here'), 'admin/settings/lingwo/senses'))) .'</p>';
+      return '<p>' . t('Adds support for "multiple senses" to dictionary entries.  It allows users to state how senses are different, provide examples and translate them individually.  Configure it !here.', array('!here' => l(t('here'), 'admin/settings/lingwo/senses'))) . '</p>';
     case 'admin/settings/lingwo/senses':
-      return '<p>'. t('Configure the fields provided for each <em>sense</em> on a dictionary entry.') .'</p>';
+      return '<p>' . t('Configure the fields provided for each <em>sense</em> on a dictionary entry.') . '</p>';
   }
 }
 
@@ -84,17 +84,17 @@ function lingwo_senses_theme() {
  * Implementation of hook_form_alter().
  */
 function lingwo_senses_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id == (LingwoEntry::$settings->content_type .'_node_form')) {
+  if ($form_id == (LingwoEntry::$settings->content_type . '_node_form')) {
     $node = $form['#node'];
     if (!isset($node)) {
       $node = (object)$form_state['node'];
     }
 
-    $func = '_lingwo_senses_widget_'. (_lingwo_is_translation($node) ? 'translation' : 'original');
+    $func = '_lingwo_senses_widget_' . (_lingwo_is_translation($node) ? 'translation' : 'original');
     $form['lingwo_senses'] = $func($node);
     $form['lingwo_senses']['#weight'] = 1;
 
-    drupal_add_js(drupal_get_path('module', 'lingwo_senses') .'/lingwo_senses.js');
+    drupal_add_js(drupal_get_path('module', 'lingwo_senses') . '/lingwo_senses.js');
   }
 }
 
@@ -181,7 +181,7 @@ function _lingwo_senses_clean(&$senses) {
 /**
  * Implementation of hook_nodeapi().
  */
-function lingwo_senses_nodeapi(&$node, $op, $a3=NULL, $a4=NULL) {
+function lingwo_senses_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if (!LingwoEntry::isEntryNode($node))
     return NULL;
 
@@ -219,7 +219,7 @@ function lingwo_senses_nodeapi(&$node, $op, $a3=NULL, $a4=NULL) {
       break;
 
     case 'view':
-      $theme = 'lingwo_senses'. (_lingwo_is_translation($node) ? '_translation' : '_original');
+      $theme = 'lingwo_senses' . (_lingwo_is_translation($node) ? '_translation' : '_original');
 
       $node->content['lingwo_senses'] = array(
         '#value' => theme($theme, $node),
@@ -245,7 +245,7 @@ function lingwo_senses_lingwo_locale_refresh() {
 
   foreach ($languages as $language) {
     foreach (LingwoSenses::getRelationshipOptions($language->language) as $key => $value) {
-      i18nstrings_update('lingwo:field:relationship:option_'. $key, $value);
+      i18nstrings_update('lingwo:field:relationship:option_' . $key, $value);
     }
   }
 }

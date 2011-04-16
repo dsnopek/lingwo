@@ -9,13 +9,13 @@ class _LingwoLanguageNull {
   public function hasValue($name) {
     return FALSE;
   }
-  public function getValue($name, $default=NULL) {
+  public function getValue($name, $default = NULL) {
     return $default;
   }
 }
 
 // Gets the form from hook_lingwo_language for the given module
-function _lingwo_language_form($func=NULL) {
+function _lingwo_language_form($func = NULL) {
   $lang = new _LingwoLanguageNull();
   $form = $func($lang);
 
@@ -26,13 +26,13 @@ function _lingwo_language_form($func=NULL) {
         if (!empty($form[$key]['#description'])) {
           $form[$key]['#description'] .= ' ';
         }
-        $form[$key]['#description'] .= '<strong>'. t('Configured per language in its definition.  These are the defaults for new language definitions.') .'</strong>';
+        $form[$key]['#description'] .= '<strong>' . t('Configured per language in its definition.  These are the defaults for new language definitions.') . '</strong>';
       }
     }
   }
 
-  $form['#submit'][] = $func .'_submit';
-  $form['#validate'][] = $func .'_validate';
+  $form['#submit'][] = $func . '_submit';
+  $form['#validate'][] = $func . '_validate';
 
   return $form;
 }

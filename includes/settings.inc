@@ -36,9 +36,9 @@ class LingwoSettings {
 
   public function name($name) {
     if (!$this->isValid($name)) {
-      throw new Exception('Invalid setting name: '. $name);
+      throw new Exception('Invalid setting name: ' . $name);
     }
-    return $this->base_name .'_'. $name;
+    return $this->base_name . '_' . $name;
   }
 
   public function getDefault($name) {

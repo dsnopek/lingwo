@@ -48,11 +48,11 @@ function theme_lingwo_senses_original_form($form) {
     }
 
     $row = array('data' => $row);
-    $row['class'] = !empty($row['class']) ? $row['class'] .' draggable' : 'draggable';
+    $row['class'] = !empty($row['class']) ? $row['class'] . ' draggable' : 'draggable';
     $rows[] = $row;
   }
 
-  drupal_add_css(drupal_get_path('module', 'lingwo_senses') .'/lingwo_senses.css');
+  drupal_add_css(drupal_get_path('module', 'lingwo_senses') . '/lingwo_senses.css');
 
   return theme('table', $header, $rows, array('class' => 'lingwo-senses-form-table')) . drupal_render($form);
 }
@@ -77,7 +77,7 @@ function theme_lingwo_senses_translation_form($form) {
     $rows[] = $row;
   }
 
-  drupal_add_css(drupal_get_path('module', 'lingwo_senses') .'/lingwo_senses.css');
+  drupal_add_css(drupal_get_path('module', 'lingwo_senses') . '/lingwo_senses.css');
 
   return theme('table', $header, $rows, array('class' => 'lingwo-senses-form-table')) . drupal_render($form);
 }
@@ -88,12 +88,12 @@ function theme_lingwo_senses_original($node) {
   if (count($entry->senses) > 0) {
     $output .= '<ol class="lingwo-senses">';
     foreach ($entry->senses as $sense) {
-      $output .= '<li class="lingwo-sense lingwo-sense-id-'. $sense->id .'">';
+      $output .= '<li class="lingwo-sense lingwo-sense-id-' . $sense->id . '">';
       if (!empty($sense->is['relationship'])) {
-        $output .= '<span class="lingwo-sense-relationship">'. theme('lingwo_senses_relationship', $node, $sense) .'</span>';
+        $output .= '<span class="lingwo-sense-relationship">' . theme('lingwo_senses_relationship', $node, $sense) . '</span>';
       }
       elseif (!empty($sense->difference)) {
-        $output .= '<span class="lingwo-sense-difference">'. check_plain($sense->difference) .'</span>';
+        $output .= '<span class="lingwo-sense-difference">' . check_plain($sense->difference) . '</span>';
       }
       else {
         $output .= '<span class="lingwo-sense-no-difference">(';
@@ -101,21 +101,21 @@ function theme_lingwo_senses_original($node) {
         $output .= ')</span>';
       }
       if (!empty($sense->example)) {
-        $output .= ': <blockquote class="lingwo-sense-example">'. implode('<br>', array_filter($sense->example, 'check_plain')) .'</blockquote>';
+        $output .= ': <blockquote class="lingwo-sense-example">' . implode('<br />', array_filter($sense->example, 'check_plain')) . '</blockquote>';
       }
       $output .= '</li>';
     };
     $output .= '</ol>';
   }
   else {
-    $output .= '<p>'. t('No sense distinctions.') .'</p>';
+    $output .= '<p>' . t('No sense distinctions.') . '</p>';
   }
 
-  drupal_add_css(drupal_get_path('module', 'lingwo_senses') .'/lingwo_senses.css');
+  drupal_add_css(drupal_get_path('module', 'lingwo_senses') . '/lingwo_senses.css');
   return $output;
 }
 
-function theme_lingwo_senses_translation($node, $options=NULL) {
+function theme_lingwo_senses_translation($node, $options = NULL) {
   $options = (is_null($options) ? array() : $options) +
     array('example' => TRUE, 'contribute' => TRUE);
 
@@ -134,7 +134,7 @@ function theme_lingwo_senses_translation($node, $options=NULL) {
     $values = array();
 
     if ($sense->no_equivalent) {
-      $values[] = '<strong><span class="lingwo-sense-no-equivalent">'. t('No equivalent in this language') .'</span></strong>';
+      $values[] = '<strong><span class="lingwo-sense-no-equivalent">' . t('No equivalent in this language') . '</span></strong>';
     }
     elseif (!empty($sense->is['relationship'])) {
       $values[] = theme('lingwo_senses_relationship', $node, $sense);
@@ -143,7 +143,7 @@ function theme_lingwo_senses_translation($node, $options=NULL) {
       foreach ($sense->trans as $value) {
         if (!empty($value)) {
           // TODO: re-instate this!
-          //$values[] = l($value, 'entry/'. $trans->target_lang .'/'. $entry->pos .'/'. $value);
+          //$values[] = l($value, 'entry/' . $trans->target_lang . '/' . $entry->pos . '/' . $value);
           $values[] = check_plain($value);
         }
       }
@@ -156,13 +156,13 @@ function theme_lingwo_senses_translation($node, $options=NULL) {
 
     $output_ids = array();
     foreach ($sense->getIds() as $id) {
-      $output_ids[] = 'lingwo-sense-id-'. $id;
+      $output_ids[] = 'lingwo-sense-id-' . $id;
     }
     $output_ids = implode(' ', $output_ids);
 
-    $output .= '<li class="lingwo-sense '. $output_ids .'">';
+    $output .= '<li class="lingwo-sense ' . $output_ids . '">';
     if ($sense->clue) {
-      $output .= '<span class="lingwo-sense-clue">('. check_plain($sense->clue) .')</span> ';
+      $output .= '<span class="lingwo-sense-clue">(' . check_plain($sense->clue) . ')</span> ';
     }
 
     $output .= join(', ', $values);
@@ -176,7 +176,7 @@ function theme_lingwo_senses_translation($node, $options=NULL) {
       else {
         $output .= '<table>';
         foreach ($translated_example as $line) {
-          $output .= '<tr><td width="50%">'. check_plain($line[0]) . '</td><td width="50%">'. check_plain($line[1]) .'</td></tr>';
+          $output .= '<tr><td width="50%">' . check_plain($line[0]) . '</td><td width="50%">' . check_plain($line[1]) . '</td></tr>';
         }
         $output .= '</table>';
       }
@@ -190,11 +190,11 @@ function theme_lingwo_senses_translation($node, $options=NULL) {
     $output .= '<p><strong>';
     $output .= t('There are @count senses without translations.', array('@count' => $without_translations));
     $output .= '  ';
-    $output .= t('!edit and contribute!', array('!edit' => l(t('Edit this entry'), 'node/'. $node->nid .'/edit')));
+    $output .= t('!edit and contribute!', array('!edit' => l(t('Edit this entry'), 'node/' . $node->nid . '/edit')));
     $output .= '</strong></p>';
   }
 
-  drupal_add_css(drupal_get_path('module', 'lingwo_senses') .'/lingwo_senses.css');
+  drupal_add_css(drupal_get_path('module', 'lingwo_senses') . '/lingwo_senses.css');
   return $output;
 }
 
@@ -216,10 +216,10 @@ function theme_lingwo_senses_relationship($node, $sense) {
   $path = implode('/', array(
     LingwoEntry::$settings->lookup_path,
     $spec,
-    $headword .'('. $pos .')'
+    $headword . '(' . $pos . ')'
   ));
 
-  $entry_text = $headword .' ('. LingwoEntry::getPosOptions($node->language, TRUE, $pos) .')';
+  $entry_text = $headword . ' (' . LingwoEntry::getPosOptions($node->language, TRUE, $pos) . ')';
   // TODO: shouldn't be a link if there is no lookup path and this node doesn't exist!
   $entry_text = l($entry_text, $path, array(
     // setup for working in the korpus reader

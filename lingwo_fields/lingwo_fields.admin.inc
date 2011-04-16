@@ -57,7 +57,7 @@ function _lingwo_fields_lingwo_language_form($language) {
   foreach ($pos as $pos_name => $fields) {
     $form['lingwo_fields_fields']['pos'][$pos_name] = array(
       '#type' => 'fieldset',
-      '#title' => isset($pos_labels[$pos_name]) ? $pos_labels[$pos_name] : $pos_name,
+      '#title' => isset($pos_labels[$pos_name]) ? check_plain($pos_labels[$pos_name]) : check_plain($pos_name),
     );
     foreach ($fields as $name => $field) {
       $element = _lingwo_fields_admin_field_form($name, $field);
@@ -91,14 +91,14 @@ function _lingwo_fields_lingwo_language_form($language) {
     '#weight' => 10,
   );
   $form['lingwo_fields_fields']['add_field'] = $add_field;
-  
+
   return $form;
 }
 
 function _lingwo_fields_admin_field_form($title, $field) {
   $element = array(
     '#type' => 'fieldset',
-    '#title' => $title,
+    '#title' => check_plain($title),
   );
   $element['label'] = array(
     '#type' => 'textfield',

@@ -86,7 +86,7 @@ function lingwo_language_install() {
   // By default, we enable translation, with the thinking that if the user has a multi-lingual site
   // they probably want translation, if then setting this variable will affect nothing.
   // 2 = TRANSLATION_ENABLED.  We can't use the symbol because 'translation' might not be enabled.
-  variable_set('language_content_type_'. $entry_type, 2); 
+  variable_set('language_content_type_' . $entry_type, 2);
 }
 
 /**

@@ -22,8 +22,8 @@ function _lingwo_name_value_list($text) {
   return $options;
 }
 
-function _lingwo_allowed_values($settings, $name, $language, $translate=FALSE, $option_name=NULL) {
-  $list = _lingwo_name_value_list(_lingwo_language_value($settings, $name .'_allowed_values', $language));
+function _lingwo_allowed_values($settings, $name, $language, $translate = FALSE, $option_name = NULL) {
+  $list = _lingwo_name_value_list(_lingwo_language_value($settings, $name . '_allowed_values', $language));
 
   // Only translate if we have i18nstrings
   $translate = $translate && module_exists('i18nstrings');
@@ -36,7 +36,7 @@ function _lingwo_allowed_values($settings, $name, $language, $translate=FALSE, $
     }
 
     if ($translate) {
-      $value = i18nstrings('lingwo:field:'. $name .':option_'. $key, $value);
+      $value = i18nstrings('lingwo:field:' . $name . ':option_' . $key, $value);
     }
 
     if ($option_name == $key) {
@@ -72,7 +72,7 @@ function _lingwo_project_dirname() {
 // Helper for generating UUIDs
 function _lingwo_make_uuid() {
   static $uuid = NULL;
-  
+
   // use the OSSP uuid module (we have to test for uuid_make because the PECL uuid
   // module also defines the uuid_create function)
   if (is_null($uuid) && function_exists('uuid_make')) {

@@ -5,7 +5,7 @@
  * API functions for dealing with entries
  */
 
-require_once(dirname(__FILE__) .'/../includes/settings.inc');
+require_once(dirname(__FILE__) . '/../includes/settings.inc');
 
 class LingwoEntrySettings extends LingwoSettings {
   protected $base_name = 'lingwo_entry';
@@ -42,7 +42,7 @@ class LingwoEntrySettings extends LingwoSettings {
 
 class LingwoEntry {
   /*
-   * 
+   *
    * Static properties/methods
    * =========================
    *
@@ -93,7 +93,7 @@ class LingwoEntry {
     return $nid;
   }
 
-  public static function hash2nid($hash, $target_lang=NULL, $fallback=FALSE) {
+  public static function hash2nid($hash, $target_lang = NULL, $fallback = FALSE) {
     $res = db_query("SELECT nid FROM {lingwo_entry} WHERE entry_hash = '%s'", $hash);
     if ($obj = db_fetch_object($res)) {
       $nid = $obj->nid;
@@ -106,7 +106,7 @@ class LingwoEntry {
   }
 
   public static function key2nid($language, $pos, $headword) {
-    $res = db_query("SELECT nid FROM {lingwo_entry} ".
+    $res = db_query("SELECT nid FROM {lingwo_entry} " .
       "WHERE language = '%s' AND pos = '%s' AND headword = '%s'",
       $language, $pos, $headword);
     if ($obj = db_fetch_object($res)) {
@@ -115,7 +115,7 @@ class LingwoEntry {
     return NULL;
   }
 
-  public static function searchHeadword($text, $options=array()) {
+  public static function searchHeadword($text, $options = array()) {
     $sql = "SELECT nid, headword, pos, language FROM {lingwo_entry}";
     $where = " WHERE headword = '%s'";
     $args = array($text);
@@ -139,7 +139,7 @@ class LingwoEntry {
     return $results;
   }
 
-  public static function search($text, $options=array()) {
+  public static function search($text, $options = array()) {
     // first get all the headword matches
     $results = self::searchHeadword($text, $options);
 
@@ -152,12 +152,12 @@ class LingwoEntry {
     return $results;
   }
 
-  public static function getPosOptions($language, $translate=FALSE, $option_name=NULL) {
+  public static function getPosOptions($language, $translate = FALSE, $option_name = NULL) {
     return _lingwo_allowed_values(self::$settings, 'pos', $language, $translate, $option_name);
   }
 
   /*
-   * 
+   *
    * Constructors
    * ============
    *
@@ -191,7 +191,7 @@ class LingwoEntry {
     return self::fromNid(self::key2nid($language, $pos, $headword));
   }
 
-  public static function fromHash($hash, $target_lang=NULL, $fallback=FALSE) {
+  public static function fromHash($hash, $target_lang = NULL, $fallback = FALSE) {
     return self::fromNid(self::hash2nid($hash, $target_lang, $fallback));
   }
 
@@ -205,7 +205,7 @@ class LingwoEntry {
   private $node;
   private $sourceNode;
   private $exts = array();
- 
+
   public function &getNode() {
     return $this->node;
   }
@@ -268,7 +268,7 @@ class LingwoEntry {
     }
   }
 
-  public function getLanguages($for_humans=FALSE) {
+  public function getLanguages($for_humans = FALSE) {
     $node = $this->node;
     if ($source_node = $this->getTranslationSource()) {
       $res = array($source_node->language, $node->language);
@@ -288,12 +288,12 @@ class LingwoEntry {
     return $res;
   }
 
-  public function getSourceLanguage($for_humans=FALSE) {
+  public function getSourceLanguage($for_humans = FALSE) {
     $languages = $this->getLanguages($for_humans);
     return $languages[0];
   }
 
-  public function getPos($for_humans=FALSE) {
+  public function getPos($for_humans = FALSE) {
     $node = $this->node;
     if ($for_humans) {
       return self::getPosOptions($this->getSourceLanguage(), TRUE, $node->pos);
@@ -305,7 +305,7 @@ class LingwoEntry {
   public function getLingwoId() {
     return implode('/', array(
       implode('-', $this->getLanguages()),
-      $this->node->title)) .'('. $this->getPos() .')';
+      $this->node->title)) . '(' . $this->getPos() . ')';
   }
 
   public function getPath() {
@@ -319,7 +319,7 @@ class LingwoEntry {
       ));
     }
 
-    return isset($node->alias) ? $node->alias : ('node/'. $node->nid);
+    return isset($node->alias) ? $node->alias : ('node/' . $node->nid);
   }
 };
 
@@ -334,11 +334,11 @@ LingwoEntry::$settings = LingwoEntrySettings::get();
  */
 
 // AHAH helper code
-require_once(dirname(__FILE__) .'/../includes/ahah.inc');
+require_once(dirname(__FILE__) . '/../includes/ahah.inc');
 
 // Multiple language helper code
-require_once(dirname(__FILE__) .'/../includes/language.inc');
+require_once(dirname(__FILE__) . '/../includes/language.inc');
 
 // Miscellaneous helper code
-require_once(dirname(__FILE__) .'/../includes/misc.inc');
+require_once(dirname(__FILE__) . '/../includes/misc.inc');
 

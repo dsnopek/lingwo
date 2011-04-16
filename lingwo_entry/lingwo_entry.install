@@ -135,7 +135,7 @@ function lingwo_entry_install() {
   $entry_type = LingwoEntry::$settings->content_type;
 
   // By default, we don't want to promote dictionary entries to the front page.
-  variable_set('node_options_'. $entry_type, array('status'));
+  variable_set('node_options_' . $entry_type, array('status'));
 
   // we need to happen after the "locale" module (which we would if the module name was
   // alphabetically higher) and probably after some other modules too..
@@ -156,7 +156,7 @@ function lingwo_entry_uninstall() {
   }
 
   // these core variables get left behind for some reason
-  variable_del("node_options_". $entry_type);
-  variable_del("upload_". $entry_type);
+  variable_del("node_options_" . $entry_type);
+  variable_del("upload_" . $entry_type);
 }
 

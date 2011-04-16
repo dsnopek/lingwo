@@ -41,7 +41,7 @@ function lingwo_entry_search_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = implode('/', array(
     LingwoEntry::$settings->lookup_path,
-    $form_state['values']['search_language'] .'-'. $language->language,
+    $form_state['values']['search_language'] . '-' . $language->language,
     $form_state['values']['search_word']
   ));
 }
@@ -110,20 +110,20 @@ function lingwo_entry_lookup_page($lang_pair, $word) {
 
     if ($target_lang && !empty($source_nids)) {
       // we are translating an existing entry
-      $output .= '<p>'. t('Entry exists but there are no translations for this language.') .'</p>';
+      $output .= '<p>' . t('Entry exists but there are no translations for this language.') . '</p>';
       // TODO: we really should give options for which source node we are translating!!
       $url_args['translation'] = $source_nids[0];
       $url_args['language'] = $target_lang;
     }
     else {
       // we are creating a source node
-      $output .= '<p>'. t('Unabled to find entry.') .'</p>';
+      $output .= '<p>' . t('Unabled to find entry.') . '</p>';
       $url_args['headword'] = urlencode($word);
       $url_args['language'] = $source_lang;
     }
 
     $link = l(t('Click here'), "node/add/$type_url_str", array('query' => $url_args));
-    $output .= '<p>'. t('!link to add the entry to dictionary.', array('!link' => $link)) .'</p>';
+    $output .= '<p>' . t('!link to add the entry to dictionary.', array('!link' => $link)) . '</p>';
 
     return $output;
   }
@@ -133,7 +133,7 @@ function lingwo_entry_lookup_page($lang_pair, $word) {
 
 function _lingwo_entry_lookup_page_node($nid) {
   // Set query path so that the tabs from the node get displayed.
-  menu_set_active_item('node/'. $nid);
+  menu_set_active_item('node/' . $nid);
 
   // Generate the node.
   return menu_execute_active_handler($url);

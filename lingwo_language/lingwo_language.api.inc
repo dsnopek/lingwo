@@ -5,7 +5,7 @@
  * API functions for dealing with language definitions
  */
 
-require_once(dirname(__FILE__) .'/../includes/settings.inc');
+require_once(dirname(__FILE__) . '/../includes/settings.inc');
 
 class LingwoLanguageSettings extends LingwoSettings {
   protected $base_name = 'lingwo_language';
@@ -66,7 +66,7 @@ class LingwoLanguage {
     return $this->node;
   }
 
-  public function getValue($name, $default=NULL) {
+  public function getValue($name, $default = NULL) {
     if (isset($this->node->lingwo_language[$name])) {
       return $this->node->lingwo_language[$name];
     }

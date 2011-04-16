@@ -5,7 +5,7 @@
  * API functions for dealing with entries
  */
 
-require_once(dirname(__FILE__) .'/../includes/settings.inc');
+require_once(dirname(__FILE__) . '/../includes/settings.inc');
 
 class LingwoFieldsSettings extends LingwoSettings {
   protected $base_name = 'lingwo_fields';
@@ -40,7 +40,7 @@ class LingwoFieldsSettings extends LingwoSettings {
 
 class LingwoFields implements IteratorAggregate {
   /*
-   * 
+   *
    * Static properties/methods
    * =========================
    *
@@ -48,10 +48,10 @@ class LingwoFields implements IteratorAggregate {
 
   public static $settings;
 
-  public static function searchForms($text, $options=array()) {
+  public static function searchForms($text, $options = array()) {
     $results = array();
 
-    $sql = "SELECT f.nid, f.form_name, e.headword, e.pos, e.language FROM {lingwo_fields_forms} f ".
+    $sql = "SELECT f.nid, f.form_name, e.headword, e.pos, e.language FROM {lingwo_fields_forms} f " .
            "INNER JOIN {lingwo_entry} e ON f.nid = e.nid";
     $where = " WHERE form = '%s'";
     $args = array($text);
@@ -94,13 +94,13 @@ class LingwoFields implements IteratorAggregate {
       $map[$name] = &$items[$index];
       // and group by type
       $type .= ($type == 'class') ? 'es' : 's';
-      $map[':'. $type][] = &$items[$index];
+      $map[':' . $type][] = &$items[$index];
     }
 
     return $map;
   }
 
-  // TODO: we need to do more about security here!  All the identifiers need to be verified as 
+  // TODO: we need to do more about security here!  All the identifiers need to be verified as
   // JavaScript safe here or even better, before we get to this point.
   public static function generateJavascript($language_name, $language) {
     $data = $language->getValue(self::$settings->name('fields'), self::$settings->fields);
@@ -108,9 +108,9 @@ class LingwoFields implements IteratorAggregate {
     $out .= "define('lingwo/languages/$language_name', ['lingwo/Language'], function (Language) {\n";
     $out .= "var lang = Language.defineLanguage('$language_name');\n";
     $out .= $data['javascript'];
-    
+
     foreach (array_keys($data['pos']) as $pos) {
-      $out .= "lang.fields['". _lingwo_fields_check_js($pos) ."'] = {\n";
+      $out .= "lang.fields['" . _lingwo_fields_check_js($pos) . "'] = {\n";
       $first = TRUE;
       foreach ($data['pos'][$pos] as $name => $field) {
         if ($first) {
@@ -120,13 +120,13 @@ class LingwoFields implements IteratorAggregate {
           $out .= ",\n";
         }
 
-        $out .= "'". _lingwo_fields_check_js($name) ."': {\n";
-        $out .= "type: '". _lingwo_fields_check_js($field['type']) ."'";
-        $out .= ",\nlabel: '". _lingwo_fields_check_js($field['label']) ."'";
+        $out .= "'" . _lingwo_fields_check_js($name) . "': {\n";
+        $out .= "type: '" . _lingwo_fields_check_js($field['type']) . "'";
+        $out .= ",\nlabel: '" . _lingwo_fields_check_js($field['label']) . "'";
 
         // write options if necessary
         if ($field['type'] == 'option' and !empty($field['options'])) {
-          $out .= ",\noptions: ". drupal_to_js(_lingwo_name_value_list($field['options']));
+          $out .= ",\noptions: " . drupal_to_js(_lingwo_name_value_list($field['options']));
         }
 
         // write out javascript functions
@@ -144,11 +144,11 @@ class LingwoFields implements IteratorAggregate {
     $out .= "return lang;\n";
     $out .= "});\n\n";
 
-    $output_path = file_directory_path() .'/lingwo/languages';
+    $output_path = file_directory_path() . '/lingwo/languages';
     if (!is_dir($output_path)) {
       mkdir($output_path, 0775, TRUE);
     }
-    $output_file = $output_path .'/'. $language_name .'.js';
+    $output_file = $output_path . '/' . $language_name . '.js';
     file_save_data($out, $output_file, FILE_EXISTS_REPLACE);
   }
 
@@ -250,7 +250,7 @@ class LingwoFields implements IteratorAggregate {
     }
   }
 
-  public function set($name, $type, $value, $automatic=FALSE) {
+  public function set($name, $type, $value, $automatic = FALSE) {
     if (!isset($this->node->lingwo_fields[$name])) {
       $field = array(
         'name' => $name,
@@ -264,7 +264,7 @@ class LingwoFields implements IteratorAggregate {
     $field['automatic'] = $automatic;
   }
 
-  public function addForm($name, $value, $automatic=FALSE) {
+  public function addForm($name, $value, $automatic = FALSE) {
     if (is_null($name)) {
       $name = '_noname_';
       $automatic = FALSE;

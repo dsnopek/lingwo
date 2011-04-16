@@ -64,7 +64,7 @@ function _lingwo_senses_install_default_senses() {
 // Sets up default senses for one entry with a list of nids
 function _lingwo_senses_install_default_senses_one($nids) {
   $data = serialize(array(array('id' => _lingwo_make_uuid())));
-  $res = db_query("SELECT nid, vid FROM {node_revisions} WHERE nid IN (". db_placeholders($nids) .")", $nids);
+  $res = db_query("SELECT nid, vid FROM {node_revisions} WHERE nid IN (" . db_placeholders($nids) . ")", $nids);
   while ($obj = db_fetch_object($res)) {
     db_query("INSERT INTO {lingwo_senses_revisions} (vid, nid, data) VALUES (%d, %d, '%s')", $obj->vid, $obj->nid, $data);
   }
@@ -75,7 +75,7 @@ function _lingwo_senses_install_default_senses_one($nids) {
  */
 function lingwo_senses_install() {
   drupal_install_schema('lingwo_senses');
-  
+
   // give existing entries default senses
   _lingwo_senses_install_default_senses();
 

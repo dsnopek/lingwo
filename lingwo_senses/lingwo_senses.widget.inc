@@ -115,7 +115,7 @@ function _lingwo_senses_widget_original($node) {
     }
     else {
       $row['message'] = array(
-        '#value' => "<em>* ". t('This entry has only one sense.') ."</em>",
+        '#value' => "<em>* " . t('This entry has only one sense.') . "</em>",
       );
     }
 
@@ -179,7 +179,7 @@ function _lingwo_senses_widget_translation($node) {
         $sense_form['data']['example'] = array(
           '#type' => 'item',
           '#title' => t('Example'),
-          '#value' => implode('<br>', array_filter($sense->example, 'check_plain')),
+          '#value' => implode('<br />', array_filter($sense->example, 'check_plain')),
         );
         $sense_form['data']['example_translation'] = array(
           '#type' => (LingwoSenses::$settings->example == 'multiple') ? 'textarea' : 'textfield',

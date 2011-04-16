@@ -5,11 +5,11 @@
  * Helper code for implementing AHAH
  */
 
-function _lingwo_ahah_path($form_item=NULL) {
-  return 'lingwo/ahah/'. (is_null($form_item) ? '' : implode('][', $form_item));
+function _lingwo_ahah_path($form_item = NULL) {
+  return 'lingwo/ahah/' . (is_null($form_item) ? '' : implode('][', $form_item));
 }
 
-function _lingwo_ahah_callback($form_item=NULL) {
+function _lingwo_ahah_callback($form_item = NULL) {
   $form_state = array('storage' => NULL, 'submitted' => FALSE);
   $form_build_id = $_POST['form_build_id'];
 

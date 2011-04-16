@@ -35,9 +35,9 @@ function lingwo_fields_menu() {
 function lingwo_fields_help($path, $arg) {
   switch ($path) {
     case 'admin/help#lingwo_fields':
-      return '<p>'. t('Adds support for "fields" to dictionary entries.  It allows you to specify multiple forms of each word, for example: plural of nouns or conjugation of verbs.  Configure it !here.', array('!here' => l(t('here'), 'admin/settings/lingwo/fields'))) .'</p>';
+      return '<p>' . t('Adds support for "fields" to dictionary entries.  It allows you to specify multiple forms of each word, for example: plural of nouns or conjugation of verbs.  Configure it !here.', array('!here' => l(t('here'), 'admin/settings/lingwo/fields'))) . '</p>';
     case 'admin/settings/lingwo/senses':
-      return '<p>'. t('Configure the fields provided for each <em>part of speech</em> on a dictionary entry.') .'</p>';
+      return '<p>' . t('Configure the fields provided for each <em>part of speech</em> on a dictionary entry.') . '</p>';
   }
 }
 
@@ -85,7 +85,7 @@ function lingwo_fields_theme() {
  * Implementation of hook_form_alter().
  */
 function lingwo_fields_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == (LingwoEntry::$settings->content_type .'_node_form')) {
+  if ($form_id == (LingwoEntry::$settings->content_type . '_node_form')) {
     $node = $form['#node'];
     $entry = LingwoEntry::fromNode($node);
     if (!$entry->isTranslation()) {
@@ -167,7 +167,7 @@ function _lingwo_fields_write_record($fields, $is_update) {
 /**
  * Implementation of hook_nodeapi().
  */
-function lingwo_fields_nodeapi(&$node, $op, $a3=NULL, $a4=NULL) {
+function lingwo_fields_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   // only applies to entries
   if ($node->type != LingwoEntry::$settings->content_type)
     return NULL;

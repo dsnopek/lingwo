@@ -5,10 +5,10 @@
  * API for lingwo_senses
  */
 
-require_once(dirname(__FILE__) .'/../includes/settings.inc');
+require_once(dirname(__FILE__) . '/../includes/settings.inc');
 
 class LingwoSensesSettings extends LingwoSettings {
-  protected $base_name = 'lingwo_senses'; 
+  protected $base_name = 'lingwo_senses';
 
   private $defaults = array(
     'difference' => 'definition',
@@ -40,7 +40,7 @@ class LingwoSensesSettings extends LingwoSettings {
 
 class LingwoSenses implements IteratorAggregate, Countable {
   /*
-   * 
+   *
    * Static properties/methods
    * =========================
    *
@@ -48,7 +48,7 @@ class LingwoSenses implements IteratorAggregate, Countable {
 
   public static $settings;
 
-  public static function getRelationshipOptions($language, $translate=FALSE, $option_name=NULL) {
+  public static function getRelationshipOptions($language, $translate = FALSE, $option_name = NULL) {
     return _lingwo_allowed_values(self::$settings, 'relationship', $language, $translate, $option_name);
   }
 
@@ -198,7 +198,7 @@ class LingwoSense {
     'children' => '_getChildren',
   );
 
-  public function __construct($parent, $orig_sense, $trans_sense=NULL) {
+  public function __construct($parent, $orig_sense, $trans_sense = NULL) {
     $this->parent = $parent;
     $this->orig_sense = $orig_sense;
     $this->trans_sense = is_array($trans_sense) ? $trans_sense : NULL;
@@ -284,7 +284,7 @@ class LingwoSense {
     }
     return array();
   }
-  
+
   public function getIds() {
     return array_merge(array($this->id), $this->_getChildren());
   }

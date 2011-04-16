@@ -25,14 +25,14 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
 
   // add the from to our form list (we have to do this here because in AHAH we can't
   // do it in the submit handler)
-  
+
   if ($form_state['clicked_button']['#value'] == t('Add new form')) {
     $value = $form_state['values']['_lingwo_fields']['add_new_form'];
     if (!empty($value['value'])) {
       $fields->addForm($value['name'], $value['value']);
     }
   }
-  
+
   // record if we are supposed to add an extra value to a field
   $extra_value = $form_state['values']['_lingwo_fields']['extra_value'];
 
@@ -58,8 +58,8 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
   );
   $element['wrapper']['fields'] = array(
     '#theme' => array(
-      'lingwo_fields_widget_form_'. $language .'_'. $pos,
-      'lingwo_fields_widget_form_'. $language, 
+      'lingwo_fields_widget_form_' . $language . '_' . $pos,
+      'lingwo_fields_widget_form_' . $language,
       'lingwo_fields_widget_form'
     ),
     '#parents' => array('lingwo_fields'),
@@ -80,8 +80,8 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
 
     $control_tag  = '<div ';
     $control_tag .= 'class="lingwo-fields-control" ';
-    $control_tag .= 'data-type="'. $field['type'] .'" ';
-    $control_tag .= 'data-name="'. $name .'" ';
+    $control_tag .= 'data-type="' . $field['type'] . '" ';
+    $control_tag .= 'data-name="' . $name . '" ';
     if (!empty($def)) {
       $control_tag .= 'data-has-definition="true" ';
     }
@@ -184,7 +184,7 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
   if (count($element['wrapper']['fields']) == 0) {
     $element['wrapper']['placeholder'] = array(
       '#type' => 'markup',
-      '#value' => '<p>'. t('No fields for this <em>Language</em> and <em>Part of speech</em>') .'</p>'
+      '#value' => '<p>' . t('No fields for this <em>Language</em> and <em>Part of speech</em>') . '</p>'
     );
   }
 
@@ -207,7 +207,7 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
   // for adding non-standard forms
   $_lingwo_fields['add_new_form'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Extra Form') .':',
+    '#title' => t('Extra Form') . ':',
     '#attributes' => array(
       'id' => 'edit--lingwo-fields-add-new-form',
     ),
@@ -254,10 +254,10 @@ function _lingwo_fields_widget(&$form, &$form_state, $entry) {
 function theme_lingwo_fields_widget_form_wrapper($element) {
   $node = $element['#node'];
 
-  $js_path = dirname(drupal_get_path('module', 'lingwo_fields')) ."/js/";
+  $js_path = dirname(drupal_get_path('module', 'lingwo_fields')) . "/js/";
 
   // Use our requirejs stubs so that requirejs itself isn't required
-  drupal_add_js($js_path .'require-stubs.js');
+  drupal_add_js($js_path . 'require-stubs.js');
   // Add all the things we know are dependencies
   // TODO: it would be sweet to do this automatically somehow (of course,
   // the build does it automatically, I'm going to try and avoid that for now)
@@ -268,15 +268,15 @@ function theme_lingwo_fields_widget_form_wrapper($element) {
   $languages = language_list('enabled');
   $languages = $languages[1];
   foreach ($languages as $language) {
-    drupal_add_js(file_directory_path() .'/lingwo/languages/'. $language->language .'.js');
+    drupal_add_js(file_directory_path() . '/lingwo/languages/' . $language->language . '.js');
   }
 
   drupal_add_js(array('lingwo_fields' => array('language' => $node->language)), 'setting');
 
-  drupal_add_js(drupal_get_path('module', 'lingwo_fields') .'/lingwo_fields.js');
-  drupal_add_css(drupal_get_path('module', 'lingwo_fields') .'/lingwo_fields.css');
+  drupal_add_js(drupal_get_path('module', 'lingwo_fields') . '/lingwo_fields.js');
+  drupal_add_css(drupal_get_path('module', 'lingwo_fields') . '/lingwo_fields.css');
 
-  return drupal_render($element); 
+  return drupal_render($element);
 }
 
 function _lingwo_fields_submit_change_pos($form, &$form_state) {
@@ -342,8 +342,8 @@ function theme_lingwo_fields_formatter_default($node) {
   }
 
   return theme(array(
-    'lingwo_fields_view_'. $node->language .'_'. $node->pos,
-    'lingwo_fields_view_'. $node->language, 
+    'lingwo_fields_view_' . $node->language . '_' . $node->pos,
+    'lingwo_fields_view_' . $node->language,
     'lingwo_fields_view'
   ), $element);
 }

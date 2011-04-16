@@ -87,12 +87,10 @@ define('lingwo/Entry', ['lingwo/util/declare'],
         // special support here if we are trying to generate like itself.
         var pos = this.getFieldsPos();
         if (typeof this.language.fields[pos] == 'undefined' ||
-          typeof this.language.fields[pos][name] == 'undefined')
-        {
+            typeof this.language.fields[pos][name] == 'undefined') {
           throw new Entry.errors.NoSuchField(name, pos);
         }
         return this.language.fields[pos][name];
-        
       },
 
       getField: function (name) {
@@ -115,7 +113,7 @@ define('lingwo/Entry', ['lingwo/util/declare'],
           for (i = 0; i < value.length; i++) {
             if (!(value[i] instanceof this.language.Word)) {
               //console.log(value[i]);
-              throw("Value returned from automatic function '"+name+"' is not a Word!");
+              throw("Value returned from automatic function '" + name + "' is not a Word!");
             }
           }
 
@@ -251,9 +249,9 @@ define('lingwo/Entry', ['lingwo/util/declare'],
         this.name = field_name;
         this.pos = pos;
         this.toString = function () {
-          var s = "No such field '"+this.name+"'";
+          var s = "No such field '" + this.name + "'";
           if (this.pos) {
-            s += " for pos '"+this.pos+"'";
+            s += " for pos '" + this.pos + "'";
           }
           return s;
         };
