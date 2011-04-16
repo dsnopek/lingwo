@@ -1,4 +1,3 @@
-; $Id$
 name = Lingwo entry
 description = Sets up a content type to be a dictionary entry.  All other Lingwo modules build on this.
 package = Lingwo dictionary
