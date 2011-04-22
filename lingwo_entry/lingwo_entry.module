@@ -19,6 +19,7 @@ require_once('lingwo_entry.api.inc');
  */
 function lingwo_entry_init() {
   if (LingwoEntry::$settings->redirect_node && LingwoEntry::$settings->lookup_path) {
+    $redirect = FALSE;
     if (preg_match('/^node\/(\d+)$/', $_GET['q'], $matches)) {
       if ($entry = LingwoEntry::fromNid($matches[1])) {
         $redirect = $entry->getPath();
