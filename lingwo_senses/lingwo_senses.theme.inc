@@ -6,7 +6,7 @@
  */
 
 function theme_lingwo_senses_original_form($form) {
-  drupal_add_tabledrag('lingwo-definition-table', 'order', 'sibling', 'sense-weight');
+  drupal_add_tabledrag('lingwo-senses-form-table', 'order', 'sibling', 'sense-weight');
 
   $elements = element_children($form);
   if (empty($elements)) {
@@ -54,7 +54,7 @@ function theme_lingwo_senses_original_form($form) {
 
   drupal_add_css(drupal_get_path('module', 'lingwo_senses') . '/lingwo_senses.css');
 
-  return theme('table', $header, $rows, array('class' => 'lingwo-senses-form-table')) . drupal_render($form);
+  return theme('table', $header, $rows, array('id' => 'lingwo-senses-form-table')) . drupal_render($form);
 }
 
 function theme_lingwo_senses_translation_form($form) {
@@ -79,7 +79,7 @@ function theme_lingwo_senses_translation_form($form) {
 
   drupal_add_css(drupal_get_path('module', 'lingwo_senses') . '/lingwo_senses.css');
 
-  return theme('table', $header, $rows, array('class' => 'lingwo-senses-form-table')) . drupal_render($form);
+  return theme('table', $header, $rows, array('id' => 'lingwo-senses-form-table')) . drupal_render($form);
 }
 
 function theme_lingwo_senses_original($node) {
