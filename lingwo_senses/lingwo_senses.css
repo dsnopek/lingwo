@@ -40,8 +40,8 @@
  * We need to undo system.css, which sets white-space: nowrap, which makes the table stretch
  * forever to include our content.
  */
-.lingwo-senses-form-table tr.odd .form-item,
-.lingwo-senses-form-table tr.even .form-item {
+#lingwo-senses-form-table tr.odd .form-item,
+#lingwo-senses-form-table tr.even .form-item {
   white-space: normal;
 }
 
