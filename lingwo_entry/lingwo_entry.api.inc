@@ -139,6 +139,25 @@ class LingwoEntry {
     return $results;
   }
 
+  public static function buildLingwoId($language, $headword, $pos = NULL) {
+    if (is_array($language)) {
+      $language = implode('-', $language);
+    }
+    if (!empty($pos)) {
+      $headword .= '(' . $pos . ')';
+    }
+    return implode('/', array($language, $headword));
+  }
+
+  public static function buildPath($language, $headword, $pos = NULL) {
+    if ($lookup_path = self::$settings->lookup_path) {
+       return implode('/', array(
+        $lookup_path,
+        self::buildLingwoId($language, $headword, $pos),
+      ));
+    }
+  }
+
   public static function search($text, $options = array()) {
     // first get all the headword matches
     $results = self::searchHeadword($text, $options);
@@ -303,20 +322,15 @@ class LingwoEntry {
   }
 
   public function getLingwoId() {
-    return implode('/', array(
-      implode('-', $this->getLanguages()),
-      $this->node->title)) . '(' . $this->getPos() . ')';
+    return self::buildLingwoId($this->getLanguages(), $this->node->title, $this->getPos());
   }
 
   public function getPath() {
     $node = $this->node;
 
-    $lookup_path = self::$settings->lookup_path;
-    if (!empty($lookup_path)) {
-      return implode('/', array(
-        $lookup_path,
-        $this->getLingwoId(),
-      ));
+    // if we can build a path from self::$settings->lookup_path
+    if ($path = self::buildPath($this->getLanguages(), $this->node->title, $this->getPos())) {
+      return $path;
     }
 
     return isset($node->alias) ? $node->alias : ('node/' . $node->nid);
