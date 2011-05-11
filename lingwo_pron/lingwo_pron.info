@@ -1,0 +1,6 @@
+name = Lingwo pronunciation
+description = Adds support for pronunciation to the dictionary entry.
+package = Lingwo dictionary
+core = 6.x
+dependencies[] = lingwo_entry
+

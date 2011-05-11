@@ -1,0 +1,81 @@
+<?php
+
+/**
+ * @file
+ * All the hooks for the 'lingwo_pron' module.
+ */
+
+// get our API functions for dealing with pron
+require_once('lingwo_pron.api.inc');
+
+/**
+ * Implementation of hook_menu().
+ */
+function lingwo_pron_menu() {
+  $items = array();
+
+  $items['admin/settings/lingwo/pron'] = array(
+    'title' => 'Pronunciation',
+    'description' => 'Settings for Lingwo Pronunciation module.',
+    'access arguments' => array('administer site configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('lingwo_pron_admin_settings_form'),
+    'file' => 'lingwo_pron.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_help().
+ */
+function lingwo_pron_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#lingwo_pron':
+      return '<p>' . t('Adds support for pronunciation to dictionary entries.  It allows users add several pronunciations, which each can have IPA, an audio file and a tag describing what makes this pronunciation differet.  Configure it !here.', array('!here' => l(t('here'), 'admin/settings/lingwo/pron'))) . '</p>';
+    case 'admin/settings/lingwo/pron':
+      return '<p>' . t('Configure the fields provided for each <em>pronunciation</em> on a dictionary entry.') . '</p>';
+  }
+}
+
+/**
+ * Implementation of hook_lingwo_entry_exts().
+ */
+function lingwo_pron_lingwo_entry_properties() {
+  return array(
+    'pron' => array(
+      'class' => 'LingwoPron',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_lingwo_locale_refresh().
+ */
+function lingwo_pron_lingwo_locale_refresh() {
+  $languages = language_list();
+  $languages = $languages[1];
+
+  foreach ($languages as $language) {
+    foreach (LingwoEntry::getPosOptions($language->language) as $key => $value) {
+      i18nstrings_update('lingwo:field:pron_tag:option_' . $key, $value);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_lingwo_language_form().
+ */
+function lingwo_pron_lingwo_language_form($language) {
+  $value = $language->getValue('lingwo_pron_pron_tag_allowed_values', LingwoPron::$settings->pron_tag_allowed_values);
+  $form['lingwo_pron_pron_tag_allowed_values'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Tag list'),
+    '#default_value' => $value,
+    '#description' => t('A list of allowed values for the "Tag" field.  Put one part of speech on each line.  Use the pipe symbol if you want the part of speech to have an alternate display name, for example: <em>us|United States</em>.'),
+    '#required' => TRUE,
+  );
+  return $form;
+}
+
