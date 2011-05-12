@@ -38,7 +38,7 @@ class LingwoPronSettings extends LingwoSettings {
   }
 }
 
-class LingwoPron {
+class LingwoPron implements IteratorAggregate, Countable {
   /*
    *
    * Static properties/methods
@@ -67,6 +67,14 @@ class LingwoPron {
     $this->node =& $entry->getNode();
   }
 
+  public function getIterator() {
+    $pron_list = empty($this->node->lingwo_pron) ? array() : $this->node->lingwo_pron;
+    return new ArrayIterator($pron_list);
+  }
+
+  public function count() {
+    return empty($this->node->lingwo_pron) ? 0 : count($this->node->lingwo_pron);
+  }
 }
 
 LingwoPron::$settings = LingwoPronSettings::get();
