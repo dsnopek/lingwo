@@ -48,6 +48,9 @@ function lingwo_pron_schema() {
  */
 function lingwo_pron_install() {
   drupal_install_schema('lingwo_pron');
+
+  // we need to happen after the lingwo_entry module with weight 50
+  update_sql("UPDATE {system} SET weight = 51 WHERE name = 'lingwo_pron'");
 }
 
 /**

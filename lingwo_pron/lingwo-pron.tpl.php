@@ -1,3 +1,10 @@
+<?php
+
+if ($source_node = $entry->getTranslationSource()) {
+  // display the pron as if this were the source node
+  $entry = LingwoEntry::fromNode($source_node);
+}
+?>
 <div class="lingwo-pron-list">
 <?php foreach ($entry->pron as $pron): ?>
   <div class="lingwo-pron-item">

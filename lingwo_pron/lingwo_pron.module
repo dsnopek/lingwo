@@ -73,10 +73,9 @@ function lingwo_pron_lingwo_language_form($language) {
   $value = $language->getValue('lingwo_pron_pron_tag_allowed_values', LingwoPron::$settings->pron_tag_allowed_values);
   $form['lingwo_pron_pron_tag_allowed_values'] = array(
     '#type' => 'textarea',
-    '#title' => t('Tag list'),
+    '#title' => t('Pronunciation tag list'),
     '#default_value' => $value,
     '#description' => t('A list of allowed values for the "Tag" field.  Put one part of speech on each line.  Use the pipe symbol if you want the part of speech to have an alternate display name, for example: <em>us|United States</em>.'),
-    '#required' => TRUE,
   );
   return $form;
 }
@@ -87,13 +86,11 @@ function lingwo_pron_lingwo_language_form($language) {
 function lingwo_pron_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == (LingwoEntry::$settings->content_type . '_node_form')) {
     $node = $form['#node'];
-    if (!isset($node)) {
-      $node = (object)$form_state['node'];
+    $entry = LingwoEntry::fromNode($node);
+    if (!$entry->isTranslation()) {
+      // only applies to entries that are not translations
+      $form['lingwo_pron'] = _lingwo_pron_widget($form, $form_state, $entry);
     }
-
-    $form['lingwo_pron'] = _lingwo_pron_widget(LingwoEntry::fromNode($node));
-
-    drupal_add_js(drupal_get_path('module', 'lingwo_pron') . '/lingwo_pron.js');
   }
 }
 
@@ -107,7 +104,7 @@ function lingwo_pron_content_extra_fields($type_name) {
     $extra['lingwo_pron'] = array(
       'label' => t('Lingwo Pronunciation'),
       'description' => t('lingwo_pron module.'),
-      'weight' => -1,
+      'weight' => 1,
     );
   }
 
@@ -118,7 +115,19 @@ function lingwo_pron_content_extra_fields($type_name) {
  * Implementation of hook_nodeapi().
  */
 function lingwo_pron_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  // only applies to entries
   if (!LingwoEntry::isEntryNode($node))
+    return NULL;
+
+  // view should happen for both sources and translations
+  if ($op == 'view') {
+    $node->content['lingwo_pron'] = array(
+      '#value' => theme('lingwo_pron', LingwoEntry::fromNode($node)),
+    );
+  }
+
+  // the rest only apply to sources
+  if (_lingwo_is_translation($node))
     return NULL;
 
   switch ($op) {
@@ -145,12 +154,6 @@ function lingwo_pron_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       else {
         drupal_write_record('lingwo_pron_revisions', $object, 'vid');
       }
-      break;
-
-    case 'view':
-      $node->content['lingwo_pron'] = array(
-        '#value' => theme('lingwo_pron', LingwoEntry::fromNode($node)),
-      );
       break;
 
     case 'delete revision':
