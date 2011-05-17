@@ -140,13 +140,30 @@ function lingwo_pron_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 
     case 'insert':
     case 'update':
+      $data = $node->lingwo_pron;
+      if (in_array('audio', LingwoPron::$settings->enabled_fields)) {
+        foreach ($data as &$item) {
+          // clean-up
+          unset($item['upload']);
+
+          // make the audio file perminent
+          if (!empty($item['audio'])) {
+            if ($item['audio']->status == FILE_STATUS_TEMPORARY) {
+              file_set_status($item['audio'], FILE_STATUS_PERMANENT);
+            }
+          }
+        }
+      }
+
       $object = (object)array(
         'nid'  => $node->nid,
         'vid'  => $node->vid,
-        'data' => $node->lingwo_pron,
+        'data' => $data,
       );
 
-      $is_new = !db_query("SELECT vid FROM {lingwo_pron_revisions} WHERE vid = %d", $node->vid);
+      // We do this since you might have enabled lingwo_pron after using lingwo_entry for awhile
+      // TODO: this is a general problem that should be handled at install!  lingwo_senses meets this problem too.
+      $is_new = !db_fetch_object(db_query("SELECT vid FROM {lingwo_pron_revisions} WHERE vid = %d", $node->vid));
 
       if (!empty($node->revision) || $is_new) {
         drupal_write_record('lingwo_pron_revisions', $object);
@@ -177,5 +194,4 @@ function lingwo_pron_theme() {
     ),
   );
 }
-
 

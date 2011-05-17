@@ -18,7 +18,7 @@ drupal_add_css(drupal_get_path('module', 'lingwo_pron') . '/lingwo_pron.css');
     <span class="lingwo-pron-ipa">/<?php print $pron['ipa']; ?>/</span>
   <?php endif; ?>
   <?php if (!empty($pron['audio'])): ?>
-    <a href="<?php print $pron['audioUrl']; ?>" class="lingwo-pron-audio">Listen</a>
+    <?php print l(t('Listen'), $pron['audio']->filepath, array('attributes' => array('class' => 'lingwo-pron-audio'))); ?>
   <?php endif; ?>
   </div>
 <?php endforeach; ?>

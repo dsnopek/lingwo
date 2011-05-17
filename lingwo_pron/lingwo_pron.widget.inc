@@ -6,6 +6,7 @@
  */
 
 function _lingwo_pron_widget(&$form, &$form_state, $entry) {
+
   $element = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
@@ -31,6 +32,18 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
     $enabled_fields[$name] = TRUE;
   }
 
+  if ($enabled_fields['audio']) {
+    $form['#attributes']['enctype'] = 'multipart/form-data';
+  }
+
+  $ahah = array(
+    'path' => _lingwo_ahah_path(array('lingwo_pron', 'wrapper')),
+    'event' => 'click',
+    'wrapper' => 'edit-lingwo_pron-wrapper',
+    'effect' => 'none',
+  );
+
+  $index = 0;
   foreach ($pron_list as $pron) {
     $item = array();
     if ($enabled_fields['ipa']) {
@@ -51,8 +64,38 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
         );
       }
     }
+    if ($enabled_fields['audio']) {
+      if (empty($pron['audio'])) {
+        $upload_name = implode('_', array('lingwo_pron', 'audio', $index));
+        $item['audio'] = array(
+          '#type' => 'file',
+          '#title' => t('Audio file'),
+          '#name' => "files[$upload_name]",
+        );
+        $item['upload'] = array(
+          '#type' => 'submit',
+          '#value' => t('Upload'),
+          '#submit' => array('_lingwo_pron_widget_submit'),
+          '#delta' => $index,
+          '#upload_name' => $upload_name,
+          //'#ahah' => $ahah,
+        );
+      }
+      else {
+        $item['audio'] = array(
+          '#type' => 'value',
+          '#value' => $pron['audio'],
+        );
+        $item['audio_display'] = array(
+          '#type' => 'item',
+          '#title' => t('Audio'),
+          '#value' => l(t('Listen'), $pron['audio']->filepath),
+        );
+      }
+    }
 
     $element['wrapper']['pron_list'][] = $item;
+    $index++;
   }
 
   $_lingwo_pron = array(
@@ -63,15 +106,7 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
     '#type' => 'button',
     '#value' => t('Refresh'),
     '#submit' => array('_lingwo_form_to_node'),
-    '#ahah' => array(
-      'path' => _lingwo_ahah_path(array('lingwo_pron', 'wrapper')),
-      'event' => 'click',
-      'wrapper' => 'edit-lingwo_pron-wrapper',
-      'effect' => 'none',
-      'progress' => array(
-        'type' => 'none',
-      ),
-    ),
+    '#ahah' => $ahah,
     '#attributes' => array('class' => 'no-js'),
     '#ahah_disable_validation' => TRUE,
   );
@@ -81,5 +116,18 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
   drupal_add_js(drupal_get_path('module', 'lingwo_pron') . '/lingwo_pron.js');
 
   return $element;
+}
+
+function _lingwo_pron_widget_submit($form, &$form_state) {
+  $node = _lingwo_form_to_node($form, $form_state);
+
+  // make the upload into a temporary file
+  $upload_name = $form_state['clicked_button']['#upload_name'];
+  // TODO: we need to configure where the files are placed and how they are named
+  $file = file_save_upload($upload_name, array(), file_directory_path(), FILE_EXISTS_RENAME);
+
+  // save the file to the node
+  $delta = $form_state['clicked_button']['#delta'];
+  $form_state['node']['lingwo_pron'][$delta]['audio'] = $file;
 }
 
