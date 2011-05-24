@@ -18,7 +18,7 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
   );
 
   $element['wrapper']['pron_list'] = array(
-    //'#theme' => 'lingwo_senses_original_form',
+    '#theme' => 'lingwo_pron_form',
     '#parents' => array('lingwo_pron'),
   );
 
@@ -71,6 +71,7 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
           '#type' => 'file',
           '#title' => t('Audio file'),
           '#name' => "files[$upload_name]",
+          '#size' => 22,
         );
         $item['upload'] = array(
           '#type' => 'submit',
@@ -78,6 +79,7 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
           '#submit' => array('_lingwo_pron_widget_submit'),
           '#delta' => $index,
           '#upload_name' => $upload_name,
+          '#attributes' => array('class' => 'lingwo-pron-upload'),
           //'#ahah' => $ahah,
         );
       }
@@ -93,6 +95,17 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
         );
       }
     }
+
+    $item['weight'] = array(
+      '#title' => t('Weight'),
+      '#type' => 'weight',
+      '#delta' => 10,
+      '#default_value' => $index,
+    );
+    $item['remove'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Remove'),
+    );
 
     $element['wrapper']['pron_list'][] = $item;
     $index++;

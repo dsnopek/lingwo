@@ -192,6 +192,10 @@ function lingwo_pron_theme() {
       'arguments' => array('entry' => NULL),
       'template' => 'lingwo-pron',
     ),
+    'lingwo_pron_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'lingwo_pron.theme.inc',
+    ),
   );
 }
 
