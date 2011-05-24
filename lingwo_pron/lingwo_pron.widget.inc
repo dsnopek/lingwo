@@ -6,6 +6,24 @@
  */
 
 function _lingwo_pron_widget(&$form, &$form_state, $entry) {
+  // Prepare our pron list
+  $pron_list = $entry->pron->getItems();
+  if ($form_state['clicked_button']['#value'] == t('Upload')) {
+    // handle an upload if there was one
+    _lingwo_pron_handle_upload($form, $form_state, $pron_list);
+  }
+  foreach ($pron_list as $index => $item) {
+    // remove the items marked for removal
+    if (!empty($form_state['values']['lingwo_pron'][$index]['remove'])) {
+      unset($pron_list[$index]);
+    }
+  }
+  if (count($pron_list) == 0) {
+    $pron_list = array(array());
+  }
+  if ($form_state['clicked_button']['#value'] == t('Add another item')) {
+    $pron_list[] = array();
+  }
 
   $element = array(
     '#type' => 'fieldset',
@@ -21,20 +39,6 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
     '#theme' => 'lingwo_pron_form',
     '#parents' => array('lingwo_pron'),
   );
-
-  $pron_list = $entry->pron->getItems();
-  foreach ($pron_list as $index => $item) {
-    // remove the items marked for removal
-    if (!empty($form_state['values']['lingwo_pron'][$index]['remove'])) {
-      unset($pron_list[$index]);
-    }
-  }
-  if (count($pron_list) == 0) {
-    $pron_list = array(array());
-  }
-  if ($form_state['clicked_button']['#value'] == t('Add another item')) {
-    $pron_list[] = array();
-  }
 
   $enabled_fields = array();
   foreach (LingwoPron::$settings->enabled_fields as $name) {
@@ -84,11 +88,11 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
         $item['upload'] = array(
           '#type' => 'submit',
           '#value' => t('Upload'),
-          '#submit' => array('_lingwo_pron_widget_submit'),
+          '#submit' => array('_lingwo_form_to_node'),
           '#delta' => $index,
           '#upload_name' => $upload_name,
           '#attributes' => array('class' => 'lingwo-pron-upload'),
-          //'#ahah' => $ahah,
+          '#ahah' => $ahah,
         );
       }
       else {
@@ -147,16 +151,26 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
   return $element;
 }
 
-function _lingwo_pron_widget_submit($form, &$form_state) {
-  $node = _lingwo_form_to_node($form, $form_state);
+function _lingwo_pron_handle_upload($form, &$form_state, &$pron_list) {
+  $upload_name = NULL;
+  $delta = NULL;
+  foreach ((array)$_FILES['files']['error'] as $source => $code) {
+    if ($code != UPLOAD_ERR_NO_FILE) {
+      $upload_name = $source;
+      if (preg_match('/^lingwo_pron_audio_(\d+)$/', $upload_name, $matches)) {
+        $delta = intval($matches[1]);
+      }
+      break;
+    }
+  }
 
-  // make the upload into a temporary file
-  $upload_name = $form_state['clicked_button']['#upload_name'];
-  // TODO: we need to configure where the files are placed and how they are named
-  $file = file_save_upload($upload_name, array(), file_directory_path(), FILE_EXISTS_RENAME);
+  if (!is_null($upload_name) && !is_null($delta)) {
+    // make the upload into a temporary file
+    // TODO: we need to configure where the files are placed and how they are named
+    $file = file_save_upload($upload_name, array(), file_directory_path(), FILE_EXISTS_RENAME);
 
-  // save the file to the node
-  $delta = $form_state['clicked_button']['#delta'];
-  $form_state['node']['lingwo_pron'][$delta]['audio'] = $file;
+    // save the file to the node
+    $pron_list[$delta]['audio'] = $file;
+  }
 }
 
