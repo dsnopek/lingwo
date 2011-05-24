@@ -20,6 +20,13 @@ function lingwo_pron_admin_settings_form() {
     '#default_value' => $settings->enabled_fields,
   );
 
+  $form[$settings->name('audio_file_path')] = array(
+    '#type' => 'textfield',
+    '#title' => t('Audio file path'),
+    '#description' => t('Optional subdirectory within the "%directory" directory where files will be stored. Do not include preceding or trailing slashes.', array('%directory' => variable_get('file_directory_path', 'files') . '/')),
+    '#default_value' => $settings->audio_file_path,
+  );
+
   $form[$settings->name('audio_file_extensions')] = array(
     '#type' => 'textfield',
     '#title' => t('Permitted upload file extensions'),

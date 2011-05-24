@@ -14,6 +14,7 @@ class LingwoPronSettings extends LingwoSettings {
     'enabled_fields' => array('ipa', 'tag', 'audio'),
     'audio_file_extensions' => 'mp3 ogg',
     'audio_file_size_max' => '512K',
+    'audio_file_path' => 'lingwo_pron',
     'max_values' => -1,
     'pron_tag_allowed_values' => '',
   );
@@ -88,7 +89,7 @@ LingwoPron::$settings = LingwoPronSettings::get();
  * Creates and returns our file path.
  */
 function _lingwo_pron_file_path() {
-  $dest = file_directory_path() . '/lingwo_pron';
+  $dest = file_directory_path() . '/' . LingwoPron::$settings->audio_file_path;
   if (!file_check_directory($dest, FILE_CREATE_DIRECTORY)) {
     watchdog('lingwo', 'Unable to create directory %directory for pronunciation files', array('%directory' => $dest));
     form_set_error(implode('][', array('lingwo_pron', $delta, 'audio')), t('The file could not be uploaded.'));
