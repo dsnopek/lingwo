@@ -141,8 +141,18 @@ function lingwo_pron_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     case 'insert':
     case 'update':
       $data = $node->lingwo_pron;
+      // remove items that are marked for removal
+      foreach ($data as $index => &$item) {
+        if (!empty($item['remove'])) {
+          unset($data[$index]);
+        }
+        else {
+          unset($item['remove']);
+        }
+      }
+      // clean-up and save audio items
       if (in_array('audio', LingwoPron::$settings->enabled_fields)) {
-        foreach ($data as &$item) {
+        foreach ($data as $index => &$item) {
           // clean-up
           unset($item['upload']);
 

@@ -67,9 +67,12 @@ class LingwoPron implements IteratorAggregate, Countable {
     $this->node =& $entry->getNode();
   }
 
+  public function getItems() {
+    return empty($this->node->lingwo_pron) ? array() : $this->node->lingwo_pron;
+  }
+
   public function getIterator() {
-    $pron_list = empty($this->node->lingwo_pron) ? array() : $this->node->lingwo_pron;
-    return new ArrayIterator($pron_list);
+    return new ArrayIterator($this->getItems());
   }
 
   public function count() {

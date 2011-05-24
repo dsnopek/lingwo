@@ -22,9 +22,18 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
     '#parents' => array('lingwo_pron'),
   );
 
-  $pron_list = $entry->pron;
+  $pron_list = $entry->pron->getItems();
+  foreach ($pron_list as $index => $item) {
+    // remove the items marked for removal
+    if (!empty($form_state['values']['lingwo_pron'][$index]['remove'])) {
+      unset($pron_list[$index]);
+    }
+  }
   if (count($pron_list) == 0) {
     $pron_list = array(array());
+  }
+  if ($form_state['clicked_button']['#value'] == t('Add another item')) {
+    $pron_list[] = array();
   }
 
   $enabled_fields = array();
@@ -38,13 +47,12 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
 
   $ahah = array(
     'path' => _lingwo_ahah_path(array('lingwo_pron', 'wrapper')),
-    'event' => 'click',
+    //'event' => 'click',
     'wrapper' => 'edit-lingwo_pron-wrapper',
     'effect' => 'none',
   );
 
-  $index = 0;
-  foreach ($pron_list as $pron) {
+  foreach ($pron_list as $index => $pron) {
     $item = array();
     if ($enabled_fields['ipa']) {
       $item['ipa'] = array(
@@ -105,6 +113,7 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
     $item['remove'] = array(
       '#type' => 'checkbox',
       '#title' => t('Remove'),
+      '#attributes' => array('class' => 'lingwo-pron-remove'),
     );
 
     $element['wrapper']['pron_list'][] = $item;
@@ -116,11 +125,18 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
     '#tree' => TRUE,
   );
   $_lingwo_pron['refresh'] = array(
-    '#type' => 'button',
+    '#type' => 'submit',
     '#value' => t('Refresh'),
     '#submit' => array('_lingwo_form_to_node'),
     '#ahah' => $ahah,
     '#attributes' => array('class' => 'no-js'),
+    '#ahah_disable_validation' => TRUE,
+  );
+  $_lingwo_pron['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add another item'),
+    '#submit' => array('_lingwo_form_to_node'),
+    '#ahah' => $ahah,
     '#ahah_disable_validation' => TRUE,
   );
 
