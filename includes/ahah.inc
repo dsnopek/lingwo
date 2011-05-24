@@ -10,6 +10,13 @@ function _lingwo_ahah_path($form_item = NULL) {
 }
 
 function _lingwo_ahah_callback($form_item = NULL) {
+  // when the content size exceeds post_size_max
+  if (empty($_POST)) {
+    drupal_set_header('HTTP/1.1 413 Request Entity Too Large');
+    print t('Request too large');
+    return;
+  }
+
   $form_state = array('storage' => NULL, 'submitted' => FALSE);
   $form_build_id = $_POST['form_build_id'];
 

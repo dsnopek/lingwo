@@ -12,6 +12,8 @@ class LingwoPronSettings extends LingwoSettings {
 
   private $defaults = array(
     'enabled_fields' => array('ipa', 'tag', 'audio'),
+    'audio_file_extensions' => 'mp3 ogg',
+    'audio_file_size_max' => '512K',
     'max_values' => -1,
     'pron_tag_allowed_values' => '',
   );

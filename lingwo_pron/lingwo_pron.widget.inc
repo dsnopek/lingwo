@@ -8,10 +8,8 @@
 function _lingwo_pron_widget(&$form, &$form_state, $entry) {
   // Prepare our pron list
   $pron_list = $entry->pron->getItems();
-  if ($form_state['clicked_button']['#value'] == t('Upload')) {
-    // handle an upload if there was one
-    _lingwo_pron_handle_upload($form, $form_state, $pron_list);
-  }
+  // handle an upload if there was one
+  _lingwo_pron_handle_upload($form, $form_state, $pron_list);
   foreach ($pron_list as $index => $item) {
     // remove the items marked for removal
     if (!empty($form_state['values']['lingwo_pron'][$index]['remove'])) {
@@ -92,7 +90,7 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
           '#delta' => $index,
           '#upload_name' => $upload_name,
           '#attributes' => array('class' => 'lingwo-pron-upload'),
-          '#ahah' => $ahah,
+          //'#ahah' => $ahah,
         );
       }
       else {
@@ -167,10 +165,40 @@ function _lingwo_pron_handle_upload($form, &$form_state, &$pron_list) {
   if (!is_null($upload_name) && !is_null($delta)) {
     // make the upload into a temporary file
     // TODO: we need to configure where the files are placed and how they are named
-    $file = file_save_upload($upload_name, array(), file_directory_path(), FILE_EXISTS_RENAME);
+    $validators = array(
+      '_lingwo_pron_validate_upload' => array(),
+    );
+    $file = file_save_upload($upload_name, $validators, file_directory_path(), FILE_EXISTS_RENAME);
 
     // save the file to the node
     $pron_list[$delta]['audio'] = $file;
   }
+}
+
+function _lingwo_pron_validate_upload($file) {
+  $errors = array();
+
+  $settings = LingwoPron::$settings;
+
+  // check extensions
+  $extensions = $settings->audio_file_extensions;
+  if (!empty($extensions)) {
+    $regex = '/\.('. ereg_replace(' +', '|', preg_quote($extensions)) .')$/i';
+    $matches = array();
+    if (!preg_match($regex, $file->filename)) {
+      $errors[] = t('Only files with the following extensions are allowed: %files-allowed.', array('%files-allowed' => $extensions));
+    }
+  }
+
+  // check the filesize
+  $max_filesize = parse_size(file_upload_max_size());
+  if ($local_max_filesize = parse_size($settings->audio_file_size_max)) {
+    $max_filesize = min($max_filesize, $local_max_filesize);
+  }
+  if ($max_filesize && $file->filesize > $max_filesize) {
+    $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', array('%filesize' => format_size($file->filesize), '%maxsize' => format_size($max_filesize)));
+  }
+
+  return $errors;
 }
 
