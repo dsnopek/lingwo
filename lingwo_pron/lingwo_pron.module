@@ -159,7 +159,20 @@ function lingwo_pron_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
           // make the audio file perminent
           if (!empty($item['audio'])) {
             if ($item['audio']->status == FILE_STATUS_TEMPORARY) {
-              file_set_status($item['audio'], FILE_STATUS_PERMANENT);
+              // move to the files perminent home
+              if ($dest = _lingwo_pron_file_path()) {
+                $dest .= '/' . $node->nid . '.' . pathinfo($item['audio']->filepath, PATHINFO_EXTENSION);
+                if (file_move($item['audio'], $dest, FILE_EXISTS_RENAME)) {
+                  $item['audio']->filepath = $dest;
+                }
+              }
+
+              // Instead of the normal API, this gets written via drupal_write_record()
+              //file_set_status($item['audio'], FILE_STATUS_PERMANENT);
+              $item['audio']->status = FILE_STATUS_PERMANENT;
+
+              // now write it!
+              drupal_write_record('files', $item['audio'], 'fid');
             }
           }
         }

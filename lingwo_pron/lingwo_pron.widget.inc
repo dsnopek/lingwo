@@ -163,15 +163,17 @@ function _lingwo_pron_handle_upload($form, &$form_state, &$pron_list) {
   }
 
   if (!is_null($upload_name) && !is_null($delta)) {
-    // make the upload into a temporary file
-    // TODO: we need to configure where the files are placed and how they are named
-    $validators = array(
-      '_lingwo_pron_validate_upload' => array(),
-    );
-    $file = file_save_upload($upload_name, $validators, file_directory_path(), FILE_EXISTS_RENAME);
+    if ($dest = _lingwo_pron_file_path()) {
+      $validators = array(
+        '_lingwo_pron_validate_upload' => array(),
+      );
 
-    // save the file to the node
-    $pron_list[$delta]['audio'] = $file;
+      // make the upload into a temporary file
+      $file = file_save_upload($upload_name, $validators, $dest, FILE_EXISTS_RENAME);
+
+      // save the file to the node
+      $pron_list[$delta]['audio'] = $file;
+    }
   }
 }
 

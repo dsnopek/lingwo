@@ -84,3 +84,16 @@ class LingwoPron implements IteratorAggregate, Countable {
 
 LingwoPron::$settings = LingwoPronSettings::get();
 
+/*
+ * Creates and returns our file path.
+ */
+function _lingwo_pron_file_path() {
+  $dest = file_directory_path() . '/lingwo_pron';
+  if (!file_check_directory($dest, FILE_CREATE_DIRECTORY)) {
+    watchdog('lingwo', 'Unable to create directory %directory for pronunciation files', array('%directory' => $dest));
+    form_set_error(implode('][', array('lingwo_pron', $delta, 'audio')), t('The file could not be uploaded.'));
+    return NULL;
+  }
+  return $dest;
+}
+
