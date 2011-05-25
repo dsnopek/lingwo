@@ -31,6 +31,10 @@ class LingwoPronSettings extends LingwoSettings {
     return array_key_exists($name, $this->defaults);
   }
 
+  public function isFieldEnabled($name) {
+    return in_array($name, $this->enabled_fields);
+  }
+
   // singleton boilerplate
   private static $settings = NULL;
   public static function get() {
