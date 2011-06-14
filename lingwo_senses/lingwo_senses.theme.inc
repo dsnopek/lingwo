@@ -36,7 +36,7 @@ function theme_lingwo_senses_original_form($form) {
     $element['weight']['#attributes']['class'] = 'sense-weight';
 
     $weight = drupal_render($element['weight']);
-    $delete = drupal_render($element['remove_sense']);
+    $operations = drupal_render($element['operations']);
 
     $row = array();
     $row[] = '';
@@ -44,7 +44,7 @@ function theme_lingwo_senses_original_form($form) {
     $row[] = $weight;
 
     if (count($elements) > 1) {
-      $row[] = $delete;
+      $row[] = $operations;
     }
 
     $row = array('data' => $row);

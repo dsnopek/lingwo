@@ -5,6 +5,14 @@
  * Helper code for implementing AHAH
  */
 
+function _lingwo_ahah_setup(&$form) {
+  $form['#cache'] = TRUE;
+
+  if (!isset($form['#action'])) {
+    $form['#action'] = request_uri();
+  }
+}
+
 function _lingwo_ahah_path($form_item = NULL) {
   return 'lingwo/ahah/' . (is_null($form_item) ? '' : implode('][', $form_item));
 }

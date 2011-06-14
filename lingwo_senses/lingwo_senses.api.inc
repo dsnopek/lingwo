@@ -69,14 +69,10 @@ class LingwoSenses implements IteratorAggregate, Countable {
     $this->node =& $entry->getNode();
 
     if (!isset($this->node->lingwo_senses)) {
-      if ($this->entry->isTranslation()) {
-        $this->node->lingwo_senses = array();
-      }
-      else {
+      $this->node->lingwo_senses = array();
+      if (!$this->entry->isTranslation()) {
         // create a single empty sense
-        $this->node->lingwo_senses = array(
-          array('id' => _lingwo_make_uuid(), 'data' => array())
-        );
+        $this->addSense();
       }
     }
   }
@@ -119,6 +115,12 @@ class LingwoSenses implements IteratorAggregate, Countable {
 
   public function count() {
     return count($this->buildSenses());
+  }
+
+  public function addSense($data = array()) {
+    if (!$this->entry->isTranslation()) {
+      array_push($this->node->lingwo_senses, array('id' => _lingwo_make_uuid(), 'data' => $data, 'new' => TRUE));
+    }
   }
 
   public function getSense($id) {
@@ -172,9 +174,11 @@ class LingwoSenses implements IteratorAggregate, Countable {
 class LingwoSense {
   private $parent;
   private $id;
+  private $new;
   private $orig_sense;
   private $trans_sense;
   private $is_translation;
+  public  $remove;
 
   // cache veriables
   private $cached_example;
@@ -204,11 +208,16 @@ class LingwoSense {
     $this->trans_sense = is_array($trans_sense) ? $trans_sense : NULL;
     $this->is_translation = (bool)$trans_sense;
     $this->id = !is_null($this->orig_sense) ? $this->orig_sense['id'] : $this->trans_sense['id'];
+    $this->new = !$this->is_translation && $orig_sense['new'];
+    $this->remove = $this->is_translation ? $trans_sense['remove'] : $orig_sense['remove'];
   }
 
   public function __get($name) {
     if ($name == 'id') {
       return $this->id;
+    }
+    if ($name == 'new') {
+      return $this->new;
     }
     if (!is_null($this->orig_sense) && $x = self::$MAP_ORIG[$name]) {
       return $this->orig_sense['data'][$x];

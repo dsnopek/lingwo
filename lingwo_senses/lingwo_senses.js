@@ -1,13 +1,28 @@
 
 Drupal.behaviors.lingwo_senses = function (context) {
-  // bind to language to trigger AHAH
-  $('#edit-language', context).change(function () {
+  function triggerAhah() {
     var id = 'edit--lingwo-senses-refresh',
       settings = Drupal.settings.ahah[id],
       event_name = settings['event'],
       selector = settings['selector'];
     $(selector).trigger(event_name);
+  };
+
+  // bind to language to trigger AHAH
+  $('#edit-language', context).change(triggerAhah);
+
+  // bind remove checkbox to trigger AHAH
+  $('.lingwo-senses-remove', context).change(function () {
+    var id = (''+this.id).replace(/-remove$/, '-new');
+    console.debug(id);
+    if ($('#'+id).val() == '1') {
+      triggerAhah();
+    }
   });
+
+  /*
+   * Setup our UI toggles (Same As, No equivalent, Relationship)
+   */
 
   function makeToggleFunc(checkFunc, togglePart) {
     return function (node, anim) {
@@ -48,7 +63,7 @@ Drupal.behaviors.lingwo_senses = function (context) {
         console.log('change');
         toggle(evt.target, true);
       });
-      $(selector).each(function () { toggle(this); });
+      $(selector, context).each(function () { toggle(this); });
     })(selector, toggles[selector]);
   }
 };

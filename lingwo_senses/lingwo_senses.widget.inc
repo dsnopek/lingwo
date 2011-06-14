@@ -5,9 +5,17 @@
  * The "widget" (form chucklet that goes on the node form)
  */
 
-function _lingwo_senses_widget_original($node) {
+function _lingwo_senses_widget_original(&$form, &$form_state, $node) {
   // TODO: should we just pass in an entry?
   $entry = LingwoEntry::fromNode($node);
+
+  if ($form_state['clicked_button']['#parents'][1] == 'add_sense') {
+    // add a new sense
+    $entry->senses->addSense();
+  }
+
+  // setup the form
+  _lingwo_ahah_setup($form);
 
   $difference = LingwoSenses::$settings->difference;
 
@@ -26,12 +34,29 @@ function _lingwo_senses_widget_original($node) {
     '#parents' => array('lingwo_senses'),
   );
 
+  $ahah = array(
+    'path' => _lingwo_ahah_path(array('lingwo_senses', 'wrapper')),
+    'wrapper' => 'edit-lingwo_senses-wrapper',
+    'effect' => 'none',
+    'progress' => array(
+      'type' => 'none',
+    ),
+  );
+
   // we count it as empty if there is less than 2 senses!
   $index = 0;
   foreach ($entry->senses as $sense) {
+    if ($sense->new && $sense->remove) {
+      continue;
+    }
+
     $row['id'] = array(
       '#type' => 'hidden',
       '#value' => $sense->id,
+    );
+    $row['new'] = array(
+      '#type' => 'hidden',
+      '#value' => $sense->new,
     );
 
     if ($difference != 'morethanone' || count($entry->senses) > 1) {
@@ -107,11 +132,18 @@ function _lingwo_senses_widget_original($node) {
     );
 
     if (count($entry->senses) > 1) {
-      $row['remove_sense'] = array(
-        '#type' => 'submit',
-        '#value' => t('Remove Sense #@num', array('@num' => $index + 1)),
-        '#submit' => array('_lingwo_senses_remove_submit'),
+      $row['operations'] = array('#parents' => array('lingwo_senses', $index));
+      $row['operations']['remove'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Remove'),
+        '#default_value' => $sense->remove,
+        '#attributes' => array('class' => 'lingwo-senses-remove'),
       );
+      if ($sense->new) {
+        $row['message'] = array(
+          '#value' => "<em>* " . t('This sense is new.') . "</em>",
+        );
+      }
     }
     else {
       $row['message'] = array(
@@ -124,33 +156,26 @@ function _lingwo_senses_widget_original($node) {
   }
   $element['wrapper']['add_sense'] = array(
     '#type' => 'submit',
-    '#value' => count($entry->senses) > 1 ? t('Add another sense') : t('Setup multiple senses'),
-    '#submit' => array('_lingwo_senses_add_submit'),
+    '#value' => t('Add another sense'),
+    '#submit' => array('_lingwo_form_to_node'),
+    '#ahah' => $ahah,
+    '#parents' => array('_lingwo_senses', 'add_sense'),
+    '#ahah_disable_validation' => TRUE,
   );
-  // for reloading the current values
-  if (!$node->nid) {
-    $element['wrapper']['refresh'] = array(
-      '#type' => 'submit',
-      '#value' => t('Refresh'),
-      '#submit' => array('_lingwo_form_to_node'),
-      '#ahah' => array(
-        'path' => _lingwo_ahah_path(array('lingwo_senses', 'wrapper')),
-        'wrapper' => 'edit-lingwo_senses-wrapper',
-        'effect' => 'none',
-        'progress' => array(
-          'type' => 'none',
-        ),
-      ),
-      '#parents' => array('_lingwo_senses', 'refresh'),
-      '#attributes' => array('class' => 'no-js'),
-      '#ahah_disable_validation' => TRUE,
-    );
-  };
+  $element['wrapper']['refresh'] = array(
+    '#type' => 'submit',
+    '#value' => t('Refresh'),
+    '#submit' => array('_lingwo_form_to_node'),
+    '#ahah' => $ahah,
+    '#parents' => array('_lingwo_senses', 'refresh'),
+    '#attributes' => array('class' => 'no-js'),
+    '#ahah_disable_validation' => TRUE,
+  );
 
   return $element;
 }
 
-function _lingwo_senses_widget_translation($node) {
+function _lingwo_senses_widget_translation(&$form, &$form_state, $node) {
   // TODO: should we just pass an entry in?
   $entry = LingwoEntry::fromNode($node);
 
@@ -255,7 +280,7 @@ function _lingwo_senses_widget_translation($node) {
         '#value' => t('This translation is for a sense that has been removed from the entry.'),
         '#suffix' => '</div>',
       );
-      $sense_form['retire_sense'] = array(
+      $sense_form['remove'] = array(
         '#type' => 'checkbox',
         '#title' => t('Retire this obsolete sense.'),
       );
@@ -265,20 +290,5 @@ function _lingwo_senses_widget_translation($node) {
   }
 
   return $element;
-}
-
-function _lingwo_senses_add_submit($form, &$form_state) {
-  $node = &_lingwo_form_to_node($form, $form_state);
-  array_push($node['lingwo_senses'], array('id' => _lingwo_make_uuid(), 'data' => array()));
-}
-
-function _lingwo_senses_remove_submit($form, &$form_state) {
-  // We have to remove first, so that changing the order doesn't change
-  // which item gets removed.
-  $delta = $form_state['clicked_button']['#parents'][1];
-  array_splice($form_state['values']['lingwo_senses'], $delta, 1);
-
-  // get the senses onto the $form_state.
-  _lingwo_form_to_node($form, $form_state);
 }
 

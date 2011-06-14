@@ -91,7 +91,7 @@ function lingwo_senses_form_alter(&$form, $form_state, $form_id) {
     }
 
     $func = '_lingwo_senses_widget_' . (_lingwo_is_translation($node) ? 'translation' : 'original');
-    $form['lingwo_senses'] = $func($node);
+    $form['lingwo_senses'] = $func($form, $form_state, $node);
     $form['lingwo_senses']['#weight'] = 1;
 
     drupal_add_js(drupal_get_path('module', 'lingwo_senses') . '/lingwo_senses.js');
@@ -115,8 +115,8 @@ function lingwo_senses_content_extra_fields($type_name) {
   return $extra;
 }
 
-function _lingwo_senses_retire_helper($item) {
-  if ($item['retire_sense']) {
+function _lingwo_senses_remove_helper($item) {
+  if ($item['remove']) {
     return FALSE;
   }
   return TRUE;
@@ -126,7 +126,7 @@ function _lingwo_senses_clean(&$senses) {
   unset($senses['wrapper']);
 
   // retire senses
-  $senses = array_filter($senses, '_lingwo_senses_retire_helper');
+  $senses = array_filter($senses, '_lingwo_senses_remove_helper');
 
   $weight = array();
   foreach ($senses as &$sense) {
@@ -134,7 +134,7 @@ function _lingwo_senses_clean(&$senses) {
     if (isset($sense['weight'])) {
       $weight[] = $sense['weight'];
     }
-    unset($sense['weight'], $sense['remove_sense']);
+    unset($sense['weight'], $sense['remove'], $sense['new'], $sense['message']);
 
     // if 'same_as' is set, then we clear the other fields
     if (!empty($sense['data']['same_as'])) {
@@ -194,7 +194,7 @@ function lingwo_senses_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       break;
 
     case 'presave':
-    case 'prepare':
+    //case 'prepare': // <-- we need some stuff that's cleaned out to remain in the edit form!
       // prepare: an unclean $node->lingwo_senses can mess up the edit form
       // presave: clean the senses before save
       if (!empty($node->lingwo_senses)) {
