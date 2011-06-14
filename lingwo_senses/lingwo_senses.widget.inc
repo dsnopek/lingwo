@@ -6,6 +6,17 @@
  */
 
 function _lingwo_senses_widget_original(&$form, &$form_state, $node) {
+  // sort the senses by weight
+  $weights = array();
+  foreach ($node->lingwo_senses as $sense) {
+    if (isset($sense['weight'])) {
+      $weights[] = $sense['weight'];
+    }
+  }
+  if (!empty($weights) && count($weights) == count($node->lingwo_senses)) {
+    array_multisort($weights, SORT_ASC, $node->lingwo_senses);
+  }
+
   // TODO: should we just pass in an entry?
   $entry = LingwoEntry::fromNode($node);
 
@@ -45,6 +56,7 @@ function _lingwo_senses_widget_original(&$form, &$form_state, $node) {
 
   // we count it as empty if there is less than 2 senses!
   $index = 0;
+  $weights = array();
   foreach ($entry->senses as $sense) {
     if ($sense->new && $sense->remove) {
       continue;
@@ -53,6 +65,7 @@ function _lingwo_senses_widget_original(&$form, &$form_state, $node) {
     $row['id'] = array(
       '#type' => 'hidden',
       '#value' => $sense->id,
+      '#attributes' => array('class' => 'lingwo-senses-id'),
     );
     $row['new'] = array(
       '#type' => 'hidden',
@@ -67,6 +80,7 @@ function _lingwo_senses_widget_original(&$form, &$form_state, $node) {
         '#type' => 'textfield',
         '#default_value' => $sense->difference,
         '#maxlength' => 255,
+        '#attributes' => array('class' => 'lingwo-senses-difference-input'),
       );
     }
     else {

@@ -14,7 +14,6 @@ Drupal.behaviors.lingwo_senses = function (context) {
   // bind remove checkbox to trigger AHAH
   $('.lingwo-senses-remove', context).change(function () {
     var id = (''+this.id).replace(/-remove$/, '-new');
-    console.debug(id);
     if ($('#'+id).val() == '1') {
       triggerAhah();
     }
