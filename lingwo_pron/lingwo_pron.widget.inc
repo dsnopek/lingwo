@@ -59,7 +59,7 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
     if ($enabled_fields['ipa']) {
       $item['ipa'] = array(
         '#type' => 'textfield',
-        '#title' => t('IPA'),
+        '#title' => t('IPA (International Phonetic Alphabet)'),
         '#default_value' => $pron['ipa'],
       );
     }
