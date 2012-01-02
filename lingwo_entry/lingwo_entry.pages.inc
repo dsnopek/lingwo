@@ -14,7 +14,18 @@ function lingwo_entry_search_form(&$form_state) {
   }
 
   $language_options = locale_language_list();
-  unset($language_options[$language->language]);
+
+  // by default, the search_language is the first language that isn't the
+  // current language.
+  // TODO: probably should default to current language itself and save the
+  // last searched in the session?
+  if (empty($search_language)) {
+    foreach ($language_options as $key => $value) {
+      if ($key != $language->language) {
+        $search_language = $key;
+      }
+    }
+  }
 
   $form['search_word'] = array(
     '#title' => t('Find word/phrase'),
