@@ -193,7 +193,7 @@ function _lingwo_fields_lingwo_language_form_submit($form, &$form_state) {
   unset($form_state['values']['lingwo_fields_fields']['add_field']);
 
   // process field removals
-  foreach (array_keys($form_state['values']['lingwo_fields_fields']['pos']) as $pos) {
+  foreach (array_keys((array)$form_state['values']['lingwo_fields_fields']['pos']) as $pos) {
     foreach ($form_state['values']['lingwo_fields_fields']['pos'][$pos] as $name => $field) {
       if ($field['remove']) {
         unset($form_state['values']['lingwo_fields_fields']['pos'][$pos][$name]);
