@@ -120,6 +120,9 @@ function lingwo_entry_schema() {
       'entry_hash'      => array('entry_hash'),
     ),
     'primary key' => array('nid'),
+
+    // Needs to match all the other tables with entry_hash so that the indexes will work!
+    'mysql_suffix' => "DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
   );
 
   return $schema;
@@ -158,5 +161,20 @@ function lingwo_entry_uninstall() {
   // these core variables get left behind for some reason
   variable_del("node_options_" . $entry_type);
   variable_del("upload_" . $entry_type);
+}
+
+/**
+ * Update functions.
+ */
+
+/**
+ * Change charset collation so entry_hash indexes work!
+ */
+function lingwo_entry_update_6001() {
+  $results = array();
+  if (in_array($GLOBALS['db_type'], array('mysql', 'mysqli'))) {
+    $results[] = update_sql("ALTER TABLE {lingwo_entry_info} CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin");
+  }
+  return $results;
 }
 
