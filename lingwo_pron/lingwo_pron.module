@@ -222,3 +222,32 @@ function lingwo_pron_theme() {
   );
 }
 
+function template_preprocess_lingwo_pron(&$vars) {
+  global $language;
+
+  $entry = $vars['entry'];
+  if ($source_node = $entry->getTranslationSource()) {
+    // display the pron as if this were the source node
+    $entry = LingwoEntry::fromNode($source_node);
+  }
+
+  $vars['pron_list'] = array();
+  foreach ($entry->pron as $pron) {
+    if (!empty($pron['tag'])) {
+      $pron['tag'] = LingwoPron::getTagOptions($language->language, TRUE, $pron['tag']);
+    }
+
+    if (!empty($pron['audio'])) {
+      if ($pron['audio']->filemime == 'audio/mpeg' && module_exists('swftools')) {
+        $pron['audio_widget'] = swf(url($pron['audio']->filepath));
+      }
+      else {
+        drupal_add_js(drupal_get_path('module', 'lingwo_pron') . '/lingwo_pron.player.js');
+        $pron['audio_widget'] = l(t('Listen'), $pron['audio']->filepath, array('attributes' => array('target' => '_blank', 'class' => 'lingwo-pron-audio')));
+      }
+    }
+
+    $vars['pron_list'][] = $pron;
+  }
+}
+
