@@ -2,6 +2,14 @@
 .lingwo-senses {
 }
 
+.lingwo-senses li.selected,
+.lingwo-senses li.selected blockquote {
+  background-color: yellow;
+  /* For IE6, which also applies the .anno.selected rule
+     here (because it ignores the first item in the selector) */
+  color: black;
+}
+
 .lingwo-sense {
 }
 
