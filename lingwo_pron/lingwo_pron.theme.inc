@@ -53,3 +53,12 @@ function theme_lingwo_pron_form($form) {
   return theme('table', $header, $rows, array('id' => 'lingwo-pron-form-table')) . drupal_render($form);
 }
 
+function theme_lingwo_pron_audio_widget($file) {
+  if ($file->filemime == 'audio/mpeg' && module_exists('swftools')) {
+    return swf(url($file->filepath));
+  }
+
+  drupal_add_js(drupal_get_path('module', 'lingwo_pron') . '/lingwo_pron.player.js');
+  return l(t('Listen'), $file->filepath, array('attributes' => array('target' => '_blank', 'class' => 'lingwo-pron-audio')));
+}
+

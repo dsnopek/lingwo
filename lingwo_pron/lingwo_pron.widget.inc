@@ -98,10 +98,10 @@ function _lingwo_pron_widget(&$form, &$form_state, $entry) {
           '#type' => 'value',
           '#value' => $pron['audio'],
         );
-        $item['audio_display'] = array(
+        $item['audio_widget'] = array(
           '#type' => 'item',
           '#title' => t('Audio'),
-          '#value' => l(t('Listen'), $pron['audio']->filepath),
+          '#value' => theme('lingwo_pron_audio_widget', $pron['audio']),
         );
       }
     }

@@ -219,6 +219,33 @@ function lingwo_pron_theme() {
       'arguments' => array('form' => NULL),
       'file' => 'lingwo_pron.theme.inc',
     ),
+    'lingwo_pron_audio_widget' => array(
+      'arguments' => array('file' => NULL),
+      'file' => 'lingwo_pron.theme.inc',
+    ),
   );
+}
+
+function template_preprocess_lingwo_pron(&$vars) {
+  global $language;
+
+  $entry = $vars['entry'];
+  if ($source_node = $entry->getTranslationSource()) {
+    // display the pron as if this were the source node
+    $entry = LingwoEntry::fromNode($source_node);
+  }
+
+  $vars['pron_list'] = array();
+  foreach ($entry->pron as $pron) {
+    if (!empty($pron['tag'])) {
+      $pron['tag'] = LingwoPron::getTagOptions($language->language, TRUE, $pron['tag']);
+    }
+
+    if (!empty($pron['audio'])) {
+      $pron['audio_widget'] = theme('lingwo_pron_audio_widget', $pron['audio']);
+    }
+
+    $vars['pron_list'][] = $pron;
+  }
 }
 
