@@ -13,6 +13,7 @@ Drupal.behaviors.lingwo_pron_player = function (context) {
           .attr('src', this.href)
           .attr('controls', 'controls')
           .css('display', 'block')
+          .css('width', '250px')
           .appendTo(this);
       
       // replace the current element
