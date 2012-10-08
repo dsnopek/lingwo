@@ -204,6 +204,8 @@ function _lingwo_senses_widget_translation(&$form, &$form_state, $node) {
     '#theme' => 'lingwo_senses_translation_form',
   );
 
+  $difference_type = LingwoSenses::$settings->difference;
+ 
   $index = 0;
   foreach ($entry->senses as $sense) {
     $sense_form = array();
@@ -215,7 +217,7 @@ function _lingwo_senses_widget_translation(&$form, &$form_state, $node) {
       if ($sense->difference || !empty($sense->is['relationship'])) {
         $sense_form['data']['difference'] = array(
           '#type' => 'item',
-          '#title' => LingwoSenses::$settings->difference == 'definition' ? t('Definition') : t('Difference'),
+          '#title' => $difference_type == 'definition' ? t('Definition') : t('Difference'),
           '#value' => !empty($sense->is['relationship']) ? theme('lingwo_senses_relationship', $node, $sense) : check_plain($sense->difference),
         );
       }
@@ -243,7 +245,7 @@ function _lingwo_senses_widget_translation(&$form, &$form_state, $node) {
         '#prefix' => "<div id=\"edit-lingwo-senses-$index-data-translation-wrapper\">",
         '#suffix' => '</div>',
       );
-      if (count($entry->senses) > 1) {
+      if ($difference_type != 'morethanone' || count($entry->senses) > 1) {
         $sense_form['data']['translation']['clue'] = array(
           '#type' => 'textfield',
           '#title' => t('Clue'),
