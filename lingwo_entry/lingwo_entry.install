@@ -50,9 +50,6 @@ function lingwo_entry_schema() {
     'primary key' => array('language', 'pos', 'headword'),
     'unique keys' => array(
       'nid' => array('nid'),
-    ),
-    'indexes' => array(
-      // probably could be unique, but I don't want to risk it right now
       'entry_hash' => array('entry_hash'),
     ),
     // The default collation (utf8_general_ci) treats accented characters (like: ó, ą, ę, ń)
@@ -117,7 +114,9 @@ function lingwo_entry_schema() {
       'target_language' => array('target_language'),
       'pos'             => array('pos'),
       'translation'     => array('translation'),
-      'entry_hash'      => array('entry_hash'),
+    ),
+    'unique keys' => array(
+      'entry_hash' => array('entry_hash'),
     ),
     'primary key' => array('nid'),
 
@@ -176,5 +175,21 @@ function lingwo_entry_update_6001() {
     $results[] = update_sql("ALTER TABLE {lingwo_entry_info} CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin");
   }
   return $results;
+}
+
+/**
+ * Make lingwo_entry_info.entry_hash unique to prevent multiple entries from
+ * having the same hash.
+ */
+function lingwo_entry_update_6002() {
+  $ret = array();
+
+  // Change the 'entry_hash' index to be unique
+  foreach (array('lingwo_entry', 'lingwo_entry_info') as $table) {
+    db_drop_index($ret, $table, 'entry_hash');
+    db_add_unique_key($ret, $table, 'entry_hash', array('entry_hash'));
+  }
+
+  return $ret;
 }
 
