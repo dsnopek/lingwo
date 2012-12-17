@@ -144,7 +144,7 @@ function theme_lingwo_senses_translation($node, $options = NULL) {
         if (!empty($value)) {
           // TODO: re-instate this!
           //$values[] = l($value, 'entry/' . $trans->target_lang . '/' . $entry->pos . '/' . $value);
-          $values[] = check_plain($value);
+          $values[] = check_plain(trim($value));
         }
       }
     }
