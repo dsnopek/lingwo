@@ -101,10 +101,13 @@ function _lingwo_senses_widget_original(&$form, &$form_state, $node) {
         '#title' => t('Example'),
         '#type' => (LingwoSenses::$settings->example == 'multiple') ? 'textarea' : 'textfield',
         '#default_value' => implode("\n", $sense->example),
-        '#maxlength' => 255,
       );
+
       if (LingwoSenses::$settings->example == 'multiple') {
         $row['data']['example']['#description'] = t('You either put multiple examples, one on each line.  Or a single multi-line example.');
+      }
+      else {
+        $row['data']['example']['#maxlength'] = 255;
       }
     }
 

@@ -112,6 +112,16 @@ function lingwo_fields_content_extra_fields($type_name) {
   return $extra;
 }
 
+/**
+ * Implementation of hook_file_download().
+ */
+function lingwo_fields_file_download($filepath) {
+  // This is necessary if private files are enabled.
+  if (preg_match(',lingwo/languages/.*?\.js,', $filepath)) {
+    return array('Content-type: application/javascript');
+  }
+}
+
 function _lingwo_fields_clean(&$items) {
   foreach ($items as &$item) {
     unset($item['remove']);
