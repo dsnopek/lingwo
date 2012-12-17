@@ -81,6 +81,14 @@ Modules
    the rules so that users only have to enter the exceptions.
  * Allows entries to be found by the dictionary search block via their other forms
 
+### lingwo_pron
+
+ * Allows entries to attach one or more pronunciation elements
+ * Includes support for audio (and an ogg vorbis player in Firefox and Chrome)
+ * Includes an IPA field for transcriptions in the International Phonetic Alphabet
+ * Includes a configurable "Tag" field to mark pronunciations as belonging to a particular
+   dialect or accent (ex. British vs. American)
+
 ### lingwo_language
 
  * Allows languages to have seperate definitions of configurable values inside of Lingwo
@@ -89,6 +97,7 @@ Modules
    - lingwo_entry: To allow different part of speech values per language.
    - lingwo_senses: To allow different sense relationship values per language.
    - lingwo_fields: To allow different standard fields per language.
+   - lingwo_pron: To allow different "Tags" per language.
 
 Security note
 -------------
