@@ -82,7 +82,10 @@ function theme_lingwo_senses_translation_form($form) {
   return theme('table', $header, $rows, array('id' => 'lingwo-senses-form-table')) . drupal_render($form);
 }
 
-function theme_lingwo_senses_original($node) {
+function theme_lingwo_senses_original($node, $options = NULL) {
+  $options = (is_null($options) ? array() : $options) +
+    array('example' => TRUE, 'contribute' => TRUE);
+
   // TODO: should we pass in an entry?
   $entry = LingwoEntry::fromNode($node);
   if (count($entry->senses) > 0) {
@@ -100,7 +103,7 @@ function theme_lingwo_senses_original($node) {
         $output .= t('No difference given');
         $output .= ')</span>';
       }
-      if (!empty($sense->example)) {
+      if (!empty($sense->example) && $options['example']) {
         $output .= ': <blockquote class="lingwo-sense-example">' . implode('<br />', array_filter($sense->example, 'check_plain')) . '</blockquote>';
       }
       $output .= '</li>';

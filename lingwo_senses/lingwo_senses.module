@@ -66,7 +66,7 @@ function lingwo_senses_theme() {
       'file' => 'lingwo_senses.theme.inc',
     ),
     'lingwo_senses_original' => array(
-      'arguments' => array('node' => NULL),
+      'arguments' => array('node' => NULL, 'options' => NULL),
       'file' => 'lingwo_senses.theme.inc',
     ),
     'lingwo_senses_translation' => array(
